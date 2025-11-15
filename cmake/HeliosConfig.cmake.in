@@ -1,0 +1,4 @@
+@PACKAGE_INIT@
+
+# Import exported targets so consumers get Helios::helios target
+include("${CMAKE_CURRENT_LIST_DIR}/HeliosTargets.cmake")
