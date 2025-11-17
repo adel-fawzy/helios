@@ -3,26 +3,21 @@
 #include <functional>
 #include <queue>
 
-namespace helios::EventQueue {
+#include "core/types/event.hpp"
+
+namespace helios::core::event_queue {
 /**
- * @class EventQueue::Interface
+ * @class event_queue::Interface
  *
  * @brief Thread-safe event queue.
  *
- * This queue holds events for event-driven classes and can handle them. These
- * events should be callable objects where they take no parameters and return
- * void.
- *
- * All public functions are thread-safe.
- *
+ * - This queue holds events for event-driven classes and can handle them. These
+ *   events should be callable objects where they take no parameters and return
+ *   void.
+ * - All public functions are thread-safe.
  */
 class Interface {
 public:
-  /**
-   * @brief Type alias for the event handler.
-   */
-  using Event = std::function<void()>;
-
   /**
    * @brief Type alias for the queue of events.
    */
@@ -43,8 +38,9 @@ public:
   /**
    * @brief Handles an event from the event queue.
    *
-   * In case there are no events in the queue, this function will block until an event is available.
+   * In case there are no events in the queue, this function will block (let the
+   * thread sleep) until an event is available.
    */
   virtual void handle() = 0;
 }; // class Interface
-} // namespace helios::EventQueue
+} // namespace helios::core::event_queue

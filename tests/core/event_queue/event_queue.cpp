@@ -1,4 +1,4 @@
-#include "EventQueue/DefaultEventQueue.hpp"
+#include "core/event_queue/event_queue.hpp"
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -21,10 +21,10 @@ constexpr std::chrono::seconds FIVE_SECONDS{5};
 
 } // namespace
 
-namespace helios::EventQueue {
+namespace helios::core::event_queue {
 /**
  * @test
- * @brief  Tests the normal scenario.
+ * @brief Tests the normal scenario.
  *
  * @details
  * Tests the normal scenario where an event is pushed and then handled.
@@ -32,14 +32,14 @@ namespace helios::EventQueue {
  * @steps
  * 1. Create a flag and initialize it with false.
  * 2. Create an event that sets the previous flag.
- * 3. Call 'DefaultEventQueue::push' and pass to it the created event.
- * 4. Call 'DefaultEventQueue::handle'.
+ * 3. Call 'EventQueue::push' and pass to it the created event.
+ * 4. Call 'EventQueue::handle'.
  * 5. Assert that the flag is set to true.
  */
-TEST(TestDefaultEventQueue, TestNormalScenario) {
+TEST(TestEventQueue, NormalScenario) {
   bool flag{false};
   auto event = [&flag] { flag = true; };
-  DefaultEventQueue queue;
+  EventQueue queue;
   queue.push(event);
   queue.handle();
   ASSERT_TRUE(flag);
@@ -47,7 +47,7 @@ TEST(TestDefaultEventQueue, TestNormalScenario) {
 
 /**
  * @test
- * @brief  Tests the normal scenario but with two events.
+ * @brief Tests the normal scenario but with two events.
  *
  * @details
  * Tests the normal scenario where two events are pushed and then they are
@@ -56,16 +56,16 @@ TEST(TestDefaultEventQueue, TestNormalScenario) {
  * @steps
  * 1. Create two flags and initialize them with false.
  * 2. Create two events, one for each flag.
- * 3. Call 'DefaultEventQueue::push' two times for each events.
- * 4. Call 'DefaultEventQueue::handle' two times.
+ * 3. Call 'EventQueue::push' two times for each events.
+ * 4. Call 'EventQueue::handle' two times.
  * 5. Assert that both flags are set to true.
  */
-TEST(TestDefaultEventQueue, TestNormalScenarioWithTwoEvents) {
+TEST(TestEventQueue, NormalScenarioWithTwoEvents) {
   bool flag1{false};
   bool flag2{false};
   auto event1 = [&flag1] { flag1 = true; };
   auto event2 = [&flag2] { flag2 = true; };
-  DefaultEventQueue queue;
+  EventQueue queue;
   queue.push(event1);
   queue.push(event2);
   queue.handle();
@@ -76,28 +76,26 @@ TEST(TestDefaultEventQueue, TestNormalScenarioWithTwoEvents) {
 
 /**
  * @test
- * @brief  Tests that the class blocks until an event is pushed.
- *
- * @details
- * Tests that the class blocks until an event is pushed.
+ * @brief Tests that the class blocks until an event is pushed.
  *
  * @steps
  * 1. Create a condition variable and a mutex.
  * 2. Create a thread and pass to it a function that calls
- *    'DefaultEventQueue::handle'. The function should also set a flag and
- *    notify the condition variable when 'DefaultEventQueue::handle' returns.
+ *    'EventQueue::handle'. The function should also set a flag and
+ *    notify the condition variable when 'EventQueue::handle' returns.
  * 3. Start the thread.
  * 4. Sleep for one second.
  * 5. Assert that the thread is still joinable.
  * 6. Create an atomic flag and initialize it with false.
  * 7. Create an event that sets the previous flag.
- * 8. Call 'DefaultEventQueue::push' and pass to it the created event.
- * 9. Use the condition variable to wait for max five seconds until the thread finishes.
+ * 8. Call 'EventQueue::push' and pass to it the created event.
+ * 9. Use the condition variable to wait for max five seconds until the thread
+ * finishes.
  * 10. Assert that the flag is set to true.
  * 11. Join the thread.
  */
-TEST(TestDefaultEventQueue, TestBlockingWhenThereAreNoEventsInTheQueue) {
-  DefaultEventQueue queue;
+TEST(TestEventQueue, BlockingWhenThereAreNoEventsInTheQueue) {
+  EventQueue queue;
   std::condition_variable cv;
   std::mutex mtx;
   std::unique_lock<std::mutex> lock{mtx};
@@ -123,4 +121,4 @@ TEST(TestDefaultEventQueue, TestBlockingWhenThereAreNoEventsInTheQueue) {
   handlerThread.join();
 }
 
-} // namespace helios::EventQueue
+} // namespace helios::core::event_queue
