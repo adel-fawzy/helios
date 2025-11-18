@@ -2,7 +2,7 @@
 
 namespace helios::core::event_queue {
 
-void EventQueue::push(Event event) {
+void EventQueue::pushImpl(const Event &event) {
   std::lock_guard<std::mutex> lock(_mtx);
   _queue.push(event);
   _cv.notify_one();

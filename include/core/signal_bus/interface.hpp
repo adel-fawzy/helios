@@ -6,44 +6,67 @@
 #include "core/types/id.hpp"
 
 namespace helios::core::signal_bus {
+
 /**
  * @class EventBus::Interface
  *
- * @brief Thread-safe event bus.
+ * @brief Event bus that could be used for communication between event-driven
+ *        classes.
  *
- * Event-driven classes can use this bus to communicate with each other by
- * subscribing to signals and publishing signals on the bus.
- *
- * All public functions are thread-safe.
+ * - Event-driven classes can use this bus to communicate with each other by
+ *   subscribing to signals and publishing signals on the bus.
+ * - Different clients are identified by their unique IDs.
+ * - All public functions are thread-safe.
  */
 class Interface {
 public:
+  /**
+   * @brief Default constructor.
+   */
+  Interface() = default;
+
+  /**
+   * @brief Default virtual destructor.
+   */
+  virtual ~Interface() = default;
+
+  /**
+   * @brief Delete copy semantics.
+   */
+  Interface(const Interface &) = delete;
+  Interface &operator=(const Interface &) = delete;
+
+  /**
+   * @brief Default move semantics.
+   */
+  Interface(Interface &&) = default;
+  Interface &operator=(Interface &&) = default;
+
   /**
    * @brief Type alias for a raw callback function.
    */
   using RawCallback = std::function<void(const void *)>;
 
   /**
-   * @brief Virtual destructor.
-   */
-  virtual ~Interface() = default;
-
-  /**
-   * @brief Subscribe to a signal type.
+   * @brief Subscribes to a signal type.
    *
-   * @tparam Signal   The signal type to subscribe to.
-   * @param id        Module ID.
+   * @tparam Signal   Signal that the subscriber wants to listen to.
+   * @tparam Callback Callable type.
+   * @param id        Subscribers' module ID.
    * @param cb        Callable invoked when the signal is published.
    *
    * - If the same ID subscribes multiple times to the same signal type,
    *   the last subscription will overwrite previous ones.
-   * - The callback is moved into the bus; do not use it after calling this
-   *   method.
+   *
+   * @note The callback passed MUST NOT BLOCK, as it will be called
+   *       synchronously. The callback must only post the work to be done to an
+   *       event loop (another thread).
    */
-  template <typename Signal>
-  void subscribe(ID id, std::function<void(const Signal &)> cb) {
-    RawCallback wrapper = [cb = std::move(cb)](const void *raw) {
-      cb(*static_cast<const Signal *>(raw));
+  template <typename Signal, typename Callback>
+  void subscribe(ID id, Callback &&cb) {
+    RawCallback wrapper = [cb = std::move(cb)](const void *signal) {
+      // Cast and dereference the signal being published
+      cb(*static_cast<const Signal *>(signal)); // Call subscriber's callback
     };
     subscribeImpl(id, typeid(Signal), std::move(wrapper));
   }
@@ -52,7 +75,7 @@ public:
    * @brief Publishes a signal to its subscribers.
    *
    * Delivers the provided `signal` to all subscribers registered for this
-   * signal type.
+   * signal type, if any.
    *
    * @tparam Signal The signal type being published.
    * @param signal  The signal instance to deliver.
@@ -79,4 +102,5 @@ protected:
 
   virtual void publishImpl(std::type_index signalType, const void *signal) = 0;
 }; // class Interface
+
 } // namespace helios::core::signal_bus

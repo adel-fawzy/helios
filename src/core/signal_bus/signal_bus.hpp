@@ -5,8 +5,8 @@
 #include <typeindex>
 #include <unordered_map>
 
+#include "core/signal_bus/interface.hpp"
 #include "core/types/id.hpp"
-#include "interface.hpp"
 
 namespace helios::core::signal_bus {
 

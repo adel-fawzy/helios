@@ -22,8 +22,8 @@ namespace helios::core::event_loop {
  * 2. Expect that 'MockEventQueue::handle' will be called.
  * 3. Set the behavior of 'MockEventQueue::handle' such that it will notify a
  *    condition variable and set a flag to indicate it was called.
- * 4. Expect that 'MockEventQueue::push' will be called.
- * 5. Set the behavior of 'MockEventQueue::push' such that it will invoke the
+ * 4. Expect that 'MockEventQueue::pushImpl' will be called.
+ * 5. Set the behavior of 'MockEventQueue::pushImpl' such that it will invoke the
  *    event immediately.
  * 6. Create an event loop with the event queue mock.
  * 7. Call 'EventLoop::start'.
@@ -41,8 +41,9 @@ TEST(TestEventLoop, NormalScenarioWithDestructor) {
         isCalled = true;
         cv.notify_one(); // Notify the testing thread
       });
-  EXPECT_CALL(*eventQueueMockPtr, push(testing::_))
-      .WillRepeatedly(testing::Invoke([](helios::core::Event event) { event(); }));
+  EXPECT_CALL(*eventQueueMockPtr, pushImpl(testing::_))
+      .WillRepeatedly(
+          testing::Invoke([](helios::core::Event event) { event(); }));
 
   EventLoop eventLoop{eventQueueMockPtr};
 
@@ -69,8 +70,8 @@ TEST(TestEventLoop, NormalScenarioWithDestructor) {
  * 2. Expect that 'MockEventQueue::handle' will be called.
  * 3. Set the behavior of 'MockEventQueue::handle' such that it will notify a
  *    condition variable and set a flag to indicate it was called.
- * 4. Expect that 'MockEventQueue::push' will be called.
- * 5. Set the behavior of 'MockEventQueue::push' such that it will invoke the
+ * 4. Expect that 'MockEventQueue::pushImpl' will be called.
+ * 5. Set the behavior of 'MockEventQueue::pushImpl' such that it will invoke the
  *    event immediately.
  * 6. Create an event loop with the event queue mock.
  * 7. Call 'EventLoop::start'.
@@ -89,8 +90,9 @@ TEST(TestEventLoop, NormalScenarioWithStop) {
         isCalled = true;
         cv.notify_one(); // Notify the testing thread
       });
-  EXPECT_CALL(*eventQueueMockPtr, push(testing::_))
-      .WillRepeatedly(testing::Invoke([](helios::core::Event event) { event(); }));
+  EXPECT_CALL(*eventQueueMockPtr, pushImpl(testing::_))
+      .WillRepeatedly(
+          testing::Invoke([](helios::core::Event event) { event(); }));
 
   EventLoop eventLoop{eventQueueMockPtr};
 
@@ -114,8 +116,8 @@ TEST(TestEventLoop, NormalScenarioWithStop) {
  * 2. Expect that 'MockEventQueue::handle' will be called.
  * 3. Set the behavior of 'MockEventQueue::handle' such that it will notify a
  *    condition variable and set a flag to indicate it was called.
- * 4. Expect that 'MockEventQueue::push' will be called.
- * 5. Set the behavior of 'MockEventQueue::push' such that it will invoke the
+ * 4. Expect that 'MockEventQueue::pushImpl' will be called.
+ * 5. Set the behavior of 'MockEventQueue::pushImpl' such that it will invoke the
  *    event immediately.
  * 6. Create an event loop with the event queue mock.
  * 7. Call 'EventLoop::start'.
@@ -134,8 +136,9 @@ TEST(TestEventLoop, StartWhileAlreadyRunning) {
         isCalled = true;
         cv.notify_one(); // Notify the testing thread
       });
-  EXPECT_CALL(*eventQueueMockPtr, push(testing::_))
-      .WillRepeatedly(testing::Invoke([](helios::core::Event event) { event(); }));
+  EXPECT_CALL(*eventQueueMockPtr, pushImpl(testing::_))
+      .WillRepeatedly(
+          testing::Invoke([](helios::core::Event event) { event(); }));
 
   EventLoop eventLoop{eventQueueMockPtr};
 
@@ -175,8 +178,8 @@ TEST(TestEventLoop, StopWhileNotRunning) {
  * 2. Expect that 'MockEventQueue::handle' will be called.
  * 3. Set the behavior of 'MockEventQueue::handle' such that it will notify a
  *    condition variable and set a flag to indicate it was called.
- * 4. Expect that 'MockEventQueue::push' will be called.
- * 5. Set the behavior of 'MockEventQueue::push' such that it will invoke the
+ * 4. Expect that 'MockEventQueue::pushImpl' will be called.
+ * 5. Set the behavior of 'MockEventQueue::pushImpl' such that it will invoke the
  *    event immediately.
  * 6. Create an event loop with the event queue mock.
  * 7. Call 'EventLoop::start'.
@@ -196,8 +199,9 @@ TEST(TestEventLoop, StartAndStopMultipleTimes) {
         isCalled = true;
         cv.notify_one(); // Notify the testing thread
       });
-  EXPECT_CALL(*eventQueueMockPtr, push(testing::_))
-      .WillRepeatedly(testing::Invoke([](helios::core::Event event) { event(); }));
+  EXPECT_CALL(*eventQueueMockPtr, pushImpl(testing::_))
+      .WillRepeatedly(
+          testing::Invoke([](helios::core::Event event) { event(); }));
 
   EventLoop eventLoop{eventQueueMockPtr};
 

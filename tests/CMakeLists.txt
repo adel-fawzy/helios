@@ -1,4 +1,3 @@
-# ---- Fetch GoogleTest ----
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -8,9 +7,6 @@ FetchContent_Declare(
 set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
-# ---- Test executable ----
 add_executable(helios_tests
     core/event_queue/event_queue.cpp
     core/signal_bus/signal_bus.cpp
@@ -31,6 +27,5 @@ target_link_libraries(helios_tests PRIVATE
     GTest::gmock_main
 )
 
-# ---- Auto-discover tests ----
 include(GoogleTest)
 gtest_discover_tests(helios_tests)

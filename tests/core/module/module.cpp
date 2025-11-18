@@ -24,13 +24,13 @@ public:
  *
  * @details
  * Test that when 'ModuleUnderTest::add' is called,
- * 'event_queue::Interface::push' is called with the correct argument.
+ * 'event_queue::Interface::pushImpl' is called with the correct argument.
  *
  * @steps
  * 1. Create 'MockEventQueue'.
  * 2. Create an empty event.
- * 3. Expect that 'MockEventQueue::push' is called with any argument.
- * 4. Let 'MockEventQueue::push' save its argument (event) in the empty event
+ * 3. Expect that 'MockEventQueue::pushImpl' is called with any argument.
+ * 4. Let 'MockEventQueue::pushImpl' save its argument (event) in the empty event
  *    created earlier.
  * 5. Create 'MockSignalBus'.
  * 6. Create 'ModuleUnderTest' and pass the mock objects.
@@ -41,7 +41,7 @@ TEST(TestModule, AddEvent) {
   auto queueMockPtr =
       std::make_shared<mocks::core::event_queue::MockEventQueue>();
   Event e{};
-  EXPECT_CALL(*queueMockPtr, push(testing::_))
+  EXPECT_CALL(*queueMockPtr, pushImpl(testing::_))
       .WillOnce(testing::SaveArg<0>(&e));
   auto signalBusMockPtr =
       std::make_shared<mocks::core::signal_bus::MockSignalBus>();

@@ -7,19 +7,35 @@ namespace helios::core::event_loop {
  *
  * @brief Starts an event loop in a separate thread and stops it.
  *
- * - The start() method is non-blocking and starts the event loop in a separate
- * thread.
- * - The stop() method blocks until the event loop thread has finished.
+ * - All public functions are not thread-safe because the event loop should be
+ *   called from one thread only.
  */
 class Interface {
 public:
+  /**
+   * @brief Default constructor.
+   */
+  Interface() = default;
+
   /**
    * @brief Virtual destructor.
    */
   virtual ~Interface() = default;
 
   /**
-   * @brief Starts the event loop.
+   * @brief Delete copy semantics.
+   */
+  Interface(const Interface &) = delete;
+  Interface &operator=(const Interface &) = delete;
+
+  /**
+   * @brief Default move semantics.
+   */
+  Interface(Interface &&) = default;
+  Interface &operator=(Interface &&) = default;
+
+  /**
+   * @brief Starts the event loop in a separate thread.
    *
    * - If called when the event loop is already running, this function does
    *   nothing.

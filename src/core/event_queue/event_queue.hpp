@@ -1,4 +1,4 @@
-#include "interface.hpp"
+#include "core/event_queue/interface.hpp"
 
 #include <condition_variable>
 #include <mutex>
@@ -30,8 +30,10 @@ public:
   EventQueue(EventQueue &&) = delete;
   EventQueue &operator=(EventQueue &&) = delete;
 
-  void push(Event event) override;
   void handle() override;
+
+protected:
+  void pushImpl(const Event &event) override;
 
 private:
   /**

@@ -6,41 +6,63 @@
 #include "core/types/event.hpp"
 
 namespace helios::core::event_queue {
+
 /**
  * @class event_queue::Interface
  *
  * @brief Thread-safe event queue.
  *
- * - This queue holds events for event-driven classes and can handle them. These
- *   events should be callable objects where they take no parameters and return
- *   void.
- * - All public functions are thread-safe.
+ * - Holds and handles events for event-driven classes.
+ * - The event is a callable object. It takes no parameters and
+ *   returns void.
+ * - All public functions in this clasee are thread-safe.
  */
 class Interface {
 public:
   /**
-   * @brief Type alias for the queue of events.
+   * @brief Default constructor.
    */
-  using QueueOfEvents = std::queue<Event>;
+  Interface() = default;
 
   /**
-   * @brief Virtual destructor.
+   * @brief Default virtual destructor.
    */
   virtual ~Interface() = default;
+
+  /**
+   * @brief Delete copy semantics.
+   */
+  Interface(const Interface &) = delete;
+  Interface &operator=(const Interface &) = delete;
+
+  /**
+   * @brief Default move semantics.
+   */
+  Interface(Interface &&) = default;
+  Interface &operator=(Interface &&) = default;
 
   /**
    * @brief Pushes an event to the event queue.
    *
    * @param event Event.
    */
-  virtual void push(Event event) = 0;
+  template <typename EventType> void push(EventType &&event) {
+    pushImpl(std::forward<EventType>(event));
+  }
 
   /**
-   * @brief Handles an event from the event queue.
+   * @brief Handles the next event in the queue and then returns.
    *
-   * In case there are no events in the queue, this function will block (let the
-   * thread sleep) until an event is available.
+   * - In case there are no events in the queue, this function will block (let
+   *   the thread sleep) until an event is available.
    */
   virtual void handle() = 0;
+
+protected:
+  /**
+   * @brief Pushes an event to the event queue (implementation).
+   */
+  virtual void pushImpl(const Event &event) = 0;
 }; // class Interface
+
 } // namespace helios::core::event_queue

@@ -5,7 +5,7 @@
 #include <thread>
 
 #include "core/event_queue/interface.hpp"
-#include "interface.hpp"
+#include "core/event_loop/interface.hpp"
 
 namespace helios::core::event_loop {
 /**

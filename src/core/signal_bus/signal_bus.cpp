@@ -15,14 +15,15 @@ void SignalBus::publishImpl(std::type_index signalType, const void *signal) {
     std::lock_guard<std::mutex> lock(_mtx);
     auto it = _signalsToSubscribers.find(signalType);
     if (it == _signalsToSubscribers.end())
+      // No subscribers for this signal type
       return;
 
     // Copy handlers so we unlock before executing callbacks
     subscribersToCallback = it->second;
   }
 
-  for (auto &[id, cb] : subscribersToCallback)
-    cb(signal);
+  for (auto &[id, wrapperCallback] : subscribersToCallback)
+    wrapperCallback(signal);
 }
 
 void SignalBus::unsubscribe(ID id) {
