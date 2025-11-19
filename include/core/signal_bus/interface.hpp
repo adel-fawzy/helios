@@ -13,6 +13,7 @@ namespace helios::core::signal_bus {
  * @brief Event bus that could be used for communication between event-driven
  *        classes.
  *
+ * @details
  * - Event-driven classes can use this bus to communicate with each other by
  *   subscribing to signals and publishing signals on the bus.
  * - Different clients are identified by their unique IDs.

@@ -12,6 +12,7 @@ add_executable(helios_tests
     core/signal_bus/signal_bus.cpp
     core/event_loop/event_loop.cpp
     core/module/module.cpp
+    logging/sink/standard_output_sink.cpp
 )
 
 target_include_directories(helios_tests PRIVATE

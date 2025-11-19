@@ -33,7 +33,7 @@ public:
   void handle() override;
 
 protected:
-  void pushImpl(const Event &event) override;
+  void pushImpl(Event event) override;
 
 private:
   /**

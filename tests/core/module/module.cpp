@@ -1,4 +1,5 @@
 #include "core/module/module.hpp"
+
 #include <gtest/gtest.h>
 
 #include "core/event_queue/mock_event_queue.hpp"

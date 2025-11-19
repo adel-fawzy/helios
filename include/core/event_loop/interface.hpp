@@ -7,8 +7,10 @@ namespace helios::core::event_loop {
  *
  * @brief Starts an event loop in a separate thread and stops it.
  *
+ * @details
  * - All public functions are not thread-safe because the event loop should be
  *   called from one thread only.
+ * - All public functions are synchronous.
  */
 class Interface {
 public:

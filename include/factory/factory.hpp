@@ -11,6 +11,7 @@ namespace helios::factory {
 /**
  * @brief Creates and returns a shared pointer to an EventQueue instance.
  *
+ * @details
  * - The EventQueue is responsible for queuing and handling events.
  * - The EventQueue instance in itself does not create any threads.
  * - The EventQueue is thread-safe.

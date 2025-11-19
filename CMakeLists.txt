@@ -13,6 +13,7 @@ add_library(helios SHARED
     src/core/event_queue/event_queue.cpp
     src/core/signal_bus/signal_bus.cpp
     src/core/event_loop/event_loop.cpp
+    src/logging/sink/standard_output_sink.cpp
 )
 
 # Link with the standard threads library

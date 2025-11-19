@@ -12,6 +12,7 @@ namespace helios::core::module {
  *
  * @brief Concrete implementation of a module.
  *
+ * @details
  * - When 'Module::add' function is called, the class shall call
  *   'event_queue::Interface::push' to add an event to the event queue.
  * - When 'Module::subscribeSignal' function is called, the class shall call
@@ -21,6 +22,8 @@ namespace helios::core::module {
  * - When 'Module::~Module' is called, the class shall call
  *   'signal_bus::Interface::unsubscribe' to unsubscribe from the signals that
  *   it subscribed to.
+ * - The signal bus is optional. A module can live without a signal bus but it
+ *   cannot live without an event queue.
  */
 class Module {
 public:
@@ -28,13 +31,16 @@ public:
    * @brief Constructor.
    */
   Module(std::shared_ptr<event_queue::Interface> eventQueue,
-         std::shared_ptr<signal_bus::Interface> signalBus)
+         std::shared_ptr<signal_bus::Interface> signalBus = nullptr)
       : _eventQueue(eventQueue), _signalBus(signalBus), _id(++_nextId) {}
 
   /**
    * @brief Virtual destructor.
    */
-  virtual ~Module() { _signalBus->unsubscribe(_id); }
+  virtual ~Module() {
+    if (_signalBus)
+      _signalBus->unsubscribe(_id);
+  }
 
 protected:
   /**
@@ -55,7 +61,8 @@ protected:
    */
   template <typename SignalT, typename Callback>
   void subscribeSignal(Callback &&cb) {
-    _signalBus->subscribe<SignalT>(_id, std::forward<Callback>(cb));
+    if (_signalBus)
+      _signalBus->subscribe<SignalT>(_id, std::forward<Callback>(cb));
   }
 
   /**
@@ -65,14 +72,15 @@ protected:
    * @param s The signal instance to publish.
    */
   template <typename SignalT> void publishSignal(const SignalT &s) {
-    _signalBus->publish<SignalT>(s);
+    if (_signalBus)
+      _signalBus->publish<SignalT>(s);
   }
 
 private:
   /**
    * @brief ID of the next module to be created.
    */
-  static ID _nextId;
+  static inline ID _nextId{0};
 
   /**
    * @brief Event queue of the module.
@@ -89,7 +97,5 @@ private:
    */
   const ID _id;
 };
-
-ID Module::_nextId{0};
 
 } // namespace helios::core::module

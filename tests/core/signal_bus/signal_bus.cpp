@@ -1,4 +1,5 @@
 #include "core/signal_bus/signal_bus.hpp"
+
 #include <gtest/gtest.h>
 
 namespace {

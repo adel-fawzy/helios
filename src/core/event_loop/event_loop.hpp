@@ -13,6 +13,7 @@ namespace helios::core::event_loop {
  *
  * @brief Concrete implementation of the event loop interface.
  *
+ * @details
  * - When 'EventLoop::start' is called, it repeatedly calls 'event_queue::Interface::handle' in a separate thread.
  * - When 'EventLoop::stop' is called, it calls 'event_queue::Interface::push' to push a stop event.
  * - The destructor shall stop the event loop if it is running.

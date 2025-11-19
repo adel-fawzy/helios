@@ -12,10 +12,12 @@ namespace helios::core::event_queue {
  *
  * @brief Thread-safe event queue.
  *
+ * @details
  * - Holds and handles events for event-driven classes.
  * - The event is a callable object. It takes no parameters and
  *   returns void.
- * - All public functions in this clasee are thread-safe.
+ * - All public functions are thread-safe.
+ * - All public functions are synchronous.
  */
 class Interface {
 public:
@@ -62,7 +64,7 @@ protected:
   /**
    * @brief Pushes an event to the event queue (implementation).
    */
-  virtual void pushImpl(const Event &event) = 0;
+  virtual void pushImpl(Event event) = 0;
 }; // class Interface
 
 } // namespace helios::core::event_queue
