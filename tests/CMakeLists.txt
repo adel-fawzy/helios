@@ -8,11 +8,12 @@ set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(helios_tests
-    core/event_queue/event_queue.cpp
-    core/signal_bus/signal_bus.cpp
-    core/event_loop/event_loop.cpp
-    core/module/module.cpp
-    logging/sink/standard_output_sink.cpp
+    core/event_queue.cpp
+    core/signal_bus.cpp
+    core/event_loop.cpp
+    core/module.cpp
+    logging/standard_output_sink.cpp
+    logging/file_sink.cpp
 )
 
 target_include_directories(helios_tests PRIVATE

@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-namespace helios::logging::sink {
+namespace helios::logging {
 
 StandardOutputSink::StandardOutputSink(
-    std::shared_ptr<core::event_queue::Interface> eventQueue)
+    std::shared_ptr<core::IEventQueue> eventQueue)
     : Module(eventQueue) {}
 
 void StandardOutputSink::writeImpl(std::string msg) {
@@ -15,4 +15,4 @@ void StandardOutputSink::writeImpl(std::string msg) {
   });
 }
 
-} // namespace helios::logging::sink
+} // namespace helios::logging

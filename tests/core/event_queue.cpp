@@ -1,4 +1,4 @@
-#include "core/event_queue/event_queue.hpp"
+#include "core/event_queue.hpp"
 #include <gtest/gtest.h>
 
 #include <atomic>

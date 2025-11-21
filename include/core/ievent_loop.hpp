@@ -1,9 +1,9 @@
 #pragma once
 
-namespace helios::core::event_loop {
+namespace helios::core {
 
 /**
- * @class event_loop::Interface
+ * @class core::IEventLoop
  *
  * @brief Starts an event loop in a separate thread and stops it.
  *
@@ -12,29 +12,29 @@ namespace helios::core::event_loop {
  *   called from one thread only.
  * - All public functions are synchronous.
  */
-class Interface {
+class IEventLoop {
 public:
   /**
    * @brief Default constructor.
    */
-  Interface() = default;
+  IEventLoop() = default;
 
   /**
    * @brief Virtual destructor.
    */
-  virtual ~Interface() = default;
+  virtual ~IEventLoop() = default;
 
   /**
    * @brief Delete copy semantics.
    */
-  Interface(const Interface &) = delete;
-  Interface &operator=(const Interface &) = delete;
+  IEventLoop(const IEventLoop &) = delete;
+  IEventLoop &operator=(const IEventLoop &) = delete;
 
   /**
    * @brief Default move semantics.
    */
-  Interface(Interface &&) = default;
-  Interface &operator=(Interface &&) = default;
+  IEventLoop(IEventLoop &&) = default;
+  IEventLoop &operator=(IEventLoop &&) = default;
 
   /**
    * @brief Starts the event loop in a separate thread.
@@ -51,6 +51,6 @@ public:
    * - Will block the calling thread until the event loop thread has finished.
    */
   virtual void stop() = 0;
-}; // class Interface
+}; // class IEventLoop
 
 } // namespace helios::core::event_loop

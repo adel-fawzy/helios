@@ -1,17 +1,17 @@
-#include "core/module/module.hpp"
+#include "core/module.hpp"
 
 #include <gtest/gtest.h>
 
-#include "core/event_queue/mock_event_queue.hpp"
-#include "core/signal_bus/mock_signal_bus.hpp"
+#include "core/mock_event_queue.hpp"
+#include "core/mock_signal_bus.hpp"
 
 namespace helios::core::module {
 
 // Create a class to expose the protected functions of the class under test
 class ModuleUnderTest : public Module {
 public:
-  ModuleUnderTest(std::shared_ptr<core::event_queue::Interface> eventQueue,
-                  std::shared_ptr<core::signal_bus::Interface> signalBus)
+  ModuleUnderTest(std::shared_ptr<core::IEventQueue> eventQueue,
+                  std::shared_ptr<core::ISignalBus> signalBus)
       : Module(eventQueue, signalBus) {}
   ~ModuleUnderTest() override = default;
   using Module::add;
@@ -45,7 +45,7 @@ TEST(TestModule, AddEvent) {
   EXPECT_CALL(*queueMockPtr, pushImpl(testing::_))
       .WillOnce(testing::SaveArg<0>(&e));
   auto signalBusMockPtr =
-      std::make_shared<mocks::core::signal_bus::MockSignalBus>();
+      std::make_shared<mocks::core::MockSignalBus>();
   ModuleUnderTest m(queueMockPtr, signalBusMockPtr);
   m.add(Event{[]() {}});
   ASSERT_TRUE(static_cast<bool>(e));
@@ -74,7 +74,7 @@ TEST(TestModule, SubscribeToSignal) {
   auto queueMockPtr =
       std::make_shared<mocks::core::event_queue::MockEventQueue>();
   auto signalBusMockPtr =
-      std::make_shared<mocks::core::signal_bus::MockSignalBus>();
+      std::make_shared<mocks::core::MockSignalBus>();
   struct Speed {
   } s;
   std::type_index savedSignalType = typeid(void);
@@ -110,7 +110,7 @@ TEST(TestModule, PublishSignal) {
   auto queueMockPtr =
       std::make_shared<mocks::core::event_queue::MockEventQueue>();
   auto signalBusMockPtr =
-      std::make_shared<mocks::core::signal_bus::MockSignalBus>();
+      std::make_shared<mocks::core::MockSignalBus>();
   struct Speed {
   } s;
   std::type_index savedSignalType = typeid(void);
@@ -142,7 +142,7 @@ TEST(TestModule, UnsubscribeOnDestruction) {
   auto queueMockPtr =
       std::make_shared<mocks::core::event_queue::MockEventQueue>();
   auto signalBusMockPtr =
-      std::make_shared<mocks::core::signal_bus::MockSignalBus>();
+      std::make_shared<mocks::core::MockSignalBus>();
   EXPECT_CALL(*signalBusMockPtr, unsubscribe(1));
   ModuleUnderTest m(queueMockPtr, signalBusMockPtr);
 }

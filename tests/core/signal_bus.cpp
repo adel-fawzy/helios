@@ -1,4 +1,4 @@
-#include "core/signal_bus/signal_bus.hpp"
+#include "core/signal_bus.hpp"
 
 #include <gtest/gtest.h>
 
@@ -11,7 +11,7 @@ constexpr helios::core::ID RANDOM_ID{42};
 
 } // namespace
 
-namespace helios::core::signal_bus {
+namespace helios::core {
 
 /**
  * @test
@@ -119,4 +119,4 @@ TEST(TestSignalBus, UnsubscribeIfIDNotSubscribed) {
   bus.unsubscribe(id);
 }
 
-} // namespace helios::core::signal_bus
+} // namespace helios::core

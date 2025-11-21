@@ -3,12 +3,12 @@
 #include <functional>
 #include <typeindex>
 
-#include "core/types/id.hpp"
+#include "core/id.hpp"
 
-namespace helios::core::signal_bus {
+namespace helios::core {
 
 /**
- * @class EventBus::Interface
+ * @class core::ISignalBus
  *
  * @brief Event bus that could be used for communication between event-driven
  *        classes.
@@ -19,29 +19,29 @@ namespace helios::core::signal_bus {
  * - Different clients are identified by their unique IDs.
  * - All public functions are thread-safe.
  */
-class Interface {
+class ISignalBus {
 public:
   /**
    * @brief Default constructor.
    */
-  Interface() = default;
+  ISignalBus() = default;
 
   /**
    * @brief Default virtual destructor.
    */
-  virtual ~Interface() = default;
+  virtual ~ISignalBus() = default;
 
   /**
    * @brief Delete copy semantics.
    */
-  Interface(const Interface &) = delete;
-  Interface &operator=(const Interface &) = delete;
+  ISignalBus(const ISignalBus &) = delete;
+  ISignalBus &operator=(const ISignalBus &) = delete;
 
   /**
    * @brief Default move semantics.
    */
-  Interface(Interface &&) = default;
-  Interface &operator=(Interface &&) = default;
+  ISignalBus(ISignalBus &&) = default;
+  ISignalBus &operator=(ISignalBus &&) = default;
 
   /**
    * @brief Type alias for a raw callback function.
@@ -102,6 +102,6 @@ protected:
                              RawCallback cb) = 0;
 
   virtual void publishImpl(std::type_index signalType, const void *signal) = 0;
-}; // class Interface
+}; // class ISignalBus
 
-} // namespace helios::core::signal_bus
+} // namespace helios::core

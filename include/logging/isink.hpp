@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-namespace helios::logging::sink {
+namespace helios::logging {
 
 /**
  * @class logging::sink::Interface
@@ -17,29 +17,29 @@ namespace helios::logging::sink {
  * @note The caller is responsible for adding the new line character. The sink
  *       will not enter a new line to the message.
  */
-class Interface {
+class ISink {
 public:
   /**
    * @brief Default constructor
    */
-  Interface() = default;
+  ISink() = default;
 
   /**
    * @brief Default destructor
    */
-  virtual ~Interface() = default;
+  virtual ~ISink() = default;
 
   /**
    * @brief Delete copy semantics
    */
-  Interface(const Interface &) = delete;
-  Interface &operator=(const Interface &) = delete;
+  ISink(const ISink &) = delete;
+  ISink &operator=(const ISink &) = delete;
 
   /**
    * @brief Default move semantics
    */
-  Interface(Interface &&) = default;
-  Interface &operator=(Interface &&) = default;
+  ISink(ISink &&) = default;
+  ISink &operator=(ISink &&) = default;
 
   /**
    * @brief Writes a message to the sink
@@ -52,6 +52,6 @@ public:
 
 protected:
   virtual void writeImpl(std::string msg) = 0;
-};
+}; // class ISink
 
-} // namespace helios::logging::sink
+} // namespace helios::logging

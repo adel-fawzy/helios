@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "core/event_loop/interface.hpp"
-#include "core/event_queue/interface.hpp"
-#include "core/signal_bus/interface.hpp"
+#include "core/ievent_loop.hpp"
+#include "core/ievent_queue.hpp"
+#include "core/isignal_bus.hpp"
 
 namespace helios::factory {
 
@@ -20,7 +20,7 @@ namespace helios::factory {
  *
  * @return Shared pointer to the created EventQueue.
  */
-std::shared_ptr<core::event_queue::Interface> createEventQueue();
+std::shared_ptr<core::IEventQueue> createEventQueue();
 
 /**
  * @brief Creates and returns a shared pointer to an EventLoop instance.
@@ -34,8 +34,8 @@ std::shared_ptr<core::event_queue::Interface> createEventQueue();
  *                   EventLoop.
  * @return Shared pointer to the created EventLoop.
  */
-std::shared_ptr<core::event_loop::Interface>
-createEventLoop(std::shared_ptr<core::event_queue::Interface> eventQueue);
+std::shared_ptr<core::IEventLoop>
+createEventLoop(std::shared_ptr<core::IEventQueue> eventQueue);
 
 /**
  * @brief Creates and returns a shared pointer to a SignalBus instance.
@@ -48,6 +48,6 @@ createEventLoop(std::shared_ptr<core::event_queue::Interface> eventQueue);
  *
  * @return Shared pointer to the created SignalBus.
  */
-std::shared_ptr<core::signal_bus::Interface> createSignalBus();
+std::shared_ptr<core::ISignalBus> createSignalBus();
 
 } // namespace helios::factory

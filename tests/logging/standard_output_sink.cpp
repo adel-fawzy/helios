@@ -1,10 +1,10 @@
-#include "logging/sink/standard_output_sink.hpp"
+#include "logging/standard_output_sink.hpp"
 
 #include <gtest/gtest.h>
 #include <iostream>
 #include <sstream>
 
-#include "core/event_queue/event_queue.hpp"
+#include "core/event_queue.hpp"
 
 namespace helios::logging::sink {
 
@@ -14,50 +14,50 @@ public:
    * @brief Saves the buffer of std::cout and then replaces it with '_buffer'.
    */
   void SetUp() override {
-    _eventQueue = std::make_shared<core::event_queue::EventQueue>();
-    _instanceUnderTest = std::make_shared<StandardOutputSink>(_eventQueue);
-    _originalBuffer = std::cout.rdbuf();
-    std::cout.rdbuf(_buffer.rdbuf());
+    eventQueue_ = std::make_shared<core::EventQueue>();
+    instanceUnderTest_ = std::make_shared<StandardOutputSink>(eventQueue_);
+    originalBuffer_ = std::cout.rdbuf();
+    std::cout.rdbuf(buffer_.rdbuf());
   }
 
   /**
    * @brief Restores the original buffer of std::cout.
    */
-  void TearDown() override { std::cout.rdbuf(_originalBuffer); }
+  void TearDown() override { std::cout.rdbuf(originalBuffer_); }
 
   /**
-   * @brief Wrapper for 'StandardOutputSink::write'.
+   * @brief Wraps 'StandardOutputSink::write'.
    */
   void write(const std::string &msg) const {
-    _instanceUnderTest->write(std::move(msg));
-    _eventQueue->handle();
+    instanceUnderTest_->write(std::move(msg));
+    eventQueue_->handle();
   }
 
   /**
    * @brief Returns the value inside the buffer.
    */
-  std::string getResult() const { return _buffer.str(); }
+  std::string getResult() const { return buffer_.str(); }
 
 private:
   /**
    * @brief Event queue of the instance under test.
    */
-  std::shared_ptr<core::event_queue::EventQueue> _eventQueue;
+  std::shared_ptr<core::EventQueue> eventQueue_;
 
   /**
    * @brief Instance under test.
    */
-  std::shared_ptr<StandardOutputSink> _instanceUnderTest;
+  std::shared_ptr<StandardOutputSink> instanceUnderTest_;
 
   /**
    * @brief Temp buffer.
    */
-  std::ostringstream _buffer;
+  std::ostringstream buffer_;
 
   /**
    * @brief Original buffer.
    */
-  std::streambuf *_originalBuffer;
+  std::streambuf *originalBuffer_;
 };
 
 /**

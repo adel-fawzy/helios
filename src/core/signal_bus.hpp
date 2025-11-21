@@ -5,17 +5,17 @@
 #include <typeindex>
 #include <unordered_map>
 
-#include "core/signal_bus/interface.hpp"
-#include "core/types/id.hpp"
+#include "core/isignal_bus.hpp"
+#include "core/id.hpp"
 
-namespace helios::core::signal_bus {
+namespace helios::core {
 
 /**
  * @class signal_bus::SignalBus
  *
  * @brief Concrete implementation of the signal bus interface.
  */
-class SignalBus : public Interface {
+class SignalBus : public ISignalBus {
 public:
   /**
    * @brief Default constructor.
@@ -58,12 +58,12 @@ private:
   /**
    * @brief Holds the subscribers for each signal.
    */
-  SignalsToSubscribersMap _signalsToSubscribers;
+  SignalsToSubscribersMap signalsToSubscribers_;
 
   /**
    * @brief Mutex to protect the class.
    */
-  std::mutex _mtx;
-};
+  std::mutex mtx_;
+}; // class SignalBus
 
-} // namespace helios::core::signal_bus
+} // namespace helios::core

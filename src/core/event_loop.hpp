@@ -4,12 +4,13 @@
 #include <memory>
 #include <thread>
 
-#include "core/event_queue/interface.hpp"
-#include "core/event_loop/interface.hpp"
+#include "core/ievent_queue.hpp"
+#include "core/ievent_loop.hpp"
 
-namespace helios::core::event_loop {
+namespace helios::core {
+
 /**
- * @class event_loop::EventLoop
+ * @class core::EventLoop
  *
  * @brief Concrete implementation of the event loop interface.
  *
@@ -18,12 +19,12 @@ namespace helios::core::event_loop {
  * - When 'EventLoop::stop' is called, it calls 'event_queue::Interface::push' to push a stop event.
  * - The destructor shall stop the event loop if it is running.
  */
-class EventLoop : public Interface {
+class EventLoop : public IEventLoop {
 public:
   /**
    * @brief Constructor.
    */
-  EventLoop(std::shared_ptr<event_queue::Interface> eventQueue);
+  EventLoop(std::shared_ptr<IEventQueue> eventQueue);
 
   /**
    * @brief Default destructor.
@@ -46,17 +47,17 @@ private:
   /**
    * @brief Shared pointer to the event queue.
    */
-  std::shared_ptr<event_queue::Interface> _eventQueue;
+  std::shared_ptr<IEventQueue> eventQueue_;
 
   /**
    * @brief Thread running the event loop.
    */
-  std::thread _thread;
+  std::thread thread_;
 
   /**
    * @brief Flag indicating if the event queue is stopped.
    */
-  std::atomic<bool> _isQueueStopped{false};
-};
+  std::atomic<bool> isQueueStopped_{false};
+}; // class EventLoop
 
-} // namespace helios::core::event_loop
+} // namespace helios::core

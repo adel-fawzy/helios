@@ -10,10 +10,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 1. Create the shared library
 #
 add_library(helios SHARED
-    src/core/event_queue/event_queue.cpp
-    src/core/signal_bus/signal_bus.cpp
-    src/core/event_loop/event_loop.cpp
-    src/logging/sink/standard_output_sink.cpp
+    src/core/event_queue.cpp
+    src/core/signal_bus.cpp
+    src/core/event_loop.cpp
+    src/logging/standard_output_sink.cpp
+    src/logging/file_sink.cpp
+    src/logging/file.cpp
 )
 
 # Link with the standard threads library

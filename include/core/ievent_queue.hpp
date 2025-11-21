@@ -3,12 +3,12 @@
 #include <functional>
 #include <queue>
 
-#include "core/types/event.hpp"
+#include "core/event.hpp"
 
-namespace helios::core::event_queue {
+namespace helios::core {
 
 /**
- * @class event_queue::Interface
+ * @class core::IEventQueue
  *
  * @brief Thread-safe event queue.
  *
@@ -19,29 +19,29 @@ namespace helios::core::event_queue {
  * - All public functions are thread-safe.
  * - All public functions are synchronous.
  */
-class Interface {
+class IEventQueue {
 public:
   /**
    * @brief Default constructor.
    */
-  Interface() = default;
+  IEventQueue() = default;
 
   /**
    * @brief Default virtual destructor.
    */
-  virtual ~Interface() = default;
+  virtual ~IEventQueue() = default;
 
   /**
    * @brief Delete copy semantics.
    */
-  Interface(const Interface &) = delete;
-  Interface &operator=(const Interface &) = delete;
+  IEventQueue(const IEventQueue &) = delete;
+  IEventQueue &operator=(const IEventQueue &) = delete;
 
   /**
    * @brief Default move semantics.
    */
-  Interface(Interface &&) = default;
-  Interface &operator=(Interface &&) = default;
+  IEventQueue(IEventQueue &&) = default;
+  IEventQueue &operator=(IEventQueue &&) = default;
 
   /**
    * @brief Pushes an event to the event queue.
@@ -65,6 +65,6 @@ protected:
    * @brief Pushes an event to the event queue (implementation).
    */
   virtual void pushImpl(Event event) = 0;
-}; // class Interface
+}; // class IEventQueue
 
-} // namespace helios::core::event_queue
+} // namespace helios::core

@@ -2,13 +2,13 @@
 
 #include <memory>
 
-#include "core/event_queue/interface.hpp"
-#include "core/signal_bus/interface.hpp"
+#include "core/ievent_queue.hpp"
+#include "core/isignal_bus.hpp"
 
-namespace helios::core::module {
+namespace helios::core {
 
 /**
- * @class module::Module
+ * @class core::Module
  *
  * @brief Concrete implementation of a module.
  *
@@ -30,16 +30,16 @@ public:
   /**
    * @brief Constructor.
    */
-  Module(std::shared_ptr<event_queue::Interface> eventQueue,
-         std::shared_ptr<signal_bus::Interface> signalBus = nullptr)
-      : _eventQueue(eventQueue), _signalBus(signalBus), _id(++_nextId) {}
+  Module(std::shared_ptr<IEventQueue> eventQueue,
+         std::shared_ptr<ISignalBus> signalBus = nullptr)
+      : eventQueue_(eventQueue), signalBus_(signalBus), id_(++nextId_) {}
 
   /**
    * @brief Virtual destructor.
    */
   virtual ~Module() {
-    if (_signalBus)
-      _signalBus->unsubscribe(_id);
+    if (signalBus_)
+      signalBus_->unsubscribe(nextId_);
   }
 
 protected:
@@ -49,7 +49,7 @@ protected:
    * @param event The event to be added.
    */
   template <typename E> void add(E &&event) {
-    _eventQueue->push(std::forward<E>(event));
+    eventQueue_->push(std::forward<E>(event));
   }
 
   /**
@@ -61,8 +61,8 @@ protected:
    */
   template <typename SignalT, typename Callback>
   void subscribeSignal(Callback &&cb) {
-    if (_signalBus)
-      _signalBus->subscribe<SignalT>(_id, std::forward<Callback>(cb));
+    if (signalBus_)
+      signalBus_->subscribe<SignalT>(id_, std::forward<Callback>(cb));
   }
 
   /**
@@ -72,30 +72,30 @@ protected:
    * @param s The signal instance to publish.
    */
   template <typename SignalT> void publishSignal(const SignalT &s) {
-    if (_signalBus)
-      _signalBus->publish<SignalT>(s);
+    if (signalBus_)
+      signalBus_->publish<SignalT>(s);
   }
 
 private:
   /**
    * @brief ID of the next module to be created.
    */
-  static inline ID _nextId{0};
+  static inline ID nextId_{0};
 
   /**
    * @brief Event queue of the module.
    */
-  std::shared_ptr<event_queue::Interface> _eventQueue;
+  std::shared_ptr<IEventQueue> eventQueue_;
 
   /**
    * @brief Shared pointer to the signal bus.
    */
-  std::shared_ptr<signal_bus::Interface> _signalBus;
+  std::shared_ptr<ISignalBus> signalBus_;
 
   /**
    * @brief Unique module ID.
    */
-  const ID _id;
-};
+  const ID id_;
+}; // class Module
 
-} // namespace helios::core::module
+} // namespace helios::core

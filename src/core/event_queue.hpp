@@ -1,16 +1,16 @@
-#include "core/event_queue/interface.hpp"
+#include "core/ievent_queue.hpp"
 
 #include <condition_variable>
 #include <mutex>
 
-namespace helios::core::event_queue {
+namespace helios::core {
 
 /**
- * @class EventQueue::EventQueue
+ * @class EventQueue
  *
  * @brief Concrete implementation of the event loop interface.
  */
-class EventQueue : public Interface {
+class EventQueue : public IEventQueue {
 public:
   /**
    * @brief Default constructor.
@@ -39,18 +39,18 @@ private:
   /**
    * @brief Queue of events.
    */
-  std::queue<Event> _queue;
+  std::queue<Event> queue_;
 
   /**
    * @brief Mutex to protect this class.
    */
-  std::mutex _mtx;
+  std::mutex mtx_;
 
   /**
    * @brief Condition variable to signal when an event is available in the
    * queue.
    */
-  std::condition_variable _cv;
-};
+  std::condition_variable cv_;
+}; // class EventQueue
 
-} // namespace helios::core::event_queue
+} // namespace helios::core

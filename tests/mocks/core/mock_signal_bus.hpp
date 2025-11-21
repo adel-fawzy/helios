@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/signal_bus/interface.hpp"
+#include "core/isignal_bus.hpp"
 #include <gmock/gmock.h>
 
-namespace helios::mocks::core::signal_bus {
+namespace helios::mocks::core {
 
-class MockSignalBus : public helios::core::signal_bus::Interface {
+class MockSignalBus : public helios::core::ISignalBus {
 public:
   MOCK_METHOD(void, unsubscribe, (helios::core::ID id), (override));
   MOCK_METHOD(void, subscribeImpl,

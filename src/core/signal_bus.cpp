@@ -1,20 +1,20 @@
-#include "core/signal_bus/signal_bus.hpp"
+#include "signal_bus.hpp"
 
-namespace helios::core::signal_bus {
+namespace helios::core {
 
 void SignalBus::subscribeImpl(ID id, std::type_index signalType,
                               RawCallback cb) {
-  std::lock_guard<std::mutex> lock(_mtx);
-  _signalsToSubscribers[signalType][id] = std::move(cb);
+  std::lock_guard<std::mutex> lock(mtx_);
+  signalsToSubscribers_[signalType][id] = std::move(cb);
 }
 
 void SignalBus::publishImpl(std::type_index signalType, const void *signal) {
   SubscribersToCallbackMap subscribersToCallback;
 
   {
-    std::lock_guard<std::mutex> lock(_mtx);
-    auto it = _signalsToSubscribers.find(signalType);
-    if (it == _signalsToSubscribers.end())
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto it = signalsToSubscribers_.find(signalType);
+    if (it == signalsToSubscribers_.end())
       // No subscribers for this signal type
       return;
 
@@ -27,11 +27,11 @@ void SignalBus::publishImpl(std::type_index signalType, const void *signal) {
 }
 
 void SignalBus::unsubscribe(ID id) {
-  std::lock_guard<std::mutex> lock(_mtx);
+  std::lock_guard<std::mutex> lock(mtx_);
 
-  for (auto &[type, subscribersToCallback] : _signalsToSubscribers) {
+  for (auto &[type, subscribersToCallback] : signalsToSubscribers_) {
     subscribersToCallback.erase(id);
   }
 }
 
-} // namespace helios::core::signal_bus
+} // namespace helios::core

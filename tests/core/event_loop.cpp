@@ -1,12 +1,12 @@
-#include "core/event_loop/event_loop.hpp"
+#include "core/event_loop.hpp"
 
 #include <condition_variable>
 #include <gtest/gtest.h>
 #include <mutex>
 
-#include "core/event_queue/mock_event_queue.hpp"
+#include "core/mock_event_queue.hpp"
 
-namespace helios::core::event_loop {
+namespace helios::core {
 
 /**
  * @test
