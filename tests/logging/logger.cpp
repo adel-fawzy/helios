@@ -1,15 +1,12 @@
-#include "logging/default_logger_factory.hpp"
+#include "Logger.hpp"
 
 #include <gtest/gtest.h>
 
-#include "logging/default_logger_factory.hpp"
-#include "logging/log_macros.hpp"
 #include <thread>
 namespace helios::logging {
 
 TEST(TestLogger, Hi) {
-  auto loggerFactory = DefaultLoggerFactory::instance();
-  std::shared_ptr<ILogger> logger = loggerFactory.create("ObjectName");
+  Logger logger{"ObjectName"};
   std::shared_ptr<core::IEventQueue> queue = loggerFactory.getEventQueue();
   LOG_DEBUG(logger) << "Adel Fawzy\n";
   queue->handle();

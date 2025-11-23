@@ -11,9 +11,9 @@ add_executable(helios_tests
     core/event_queue.cpp
     core/signal_bus.cpp
     core/event_loop.cpp
-    core/module.cpp
-    logging/standard_output_sink.cpp
-    logging/file_sink.cpp
+    # core/module.cpp
+    # logging/standard_output_sink.cpp
+    # logging/file_sink.cpp
     logging/logger.cpp
 )
 

@@ -6,83 +6,80 @@ project(Helios VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(cmake/LoggerConfig.cmake)
+include(CTest)
 
-# Create the shared library
-add_library(helios SHARED
-    src/core/event_queue.cpp
-    src/core/signal_bus.cpp
-    src/core/event_loop.cpp
-    src/logging/standard_output_sink.cpp
-    src/logging/file_sink.cpp
-    src/logging/file.cpp
-    src/logging/default_logger_factory.cpp
-    src/logging/logger.cpp
-    src/logging/log_message.cpp
+# -----------------------------------------
+# Create final shared library
+# -----------------------------------------
+add_library(helios SHARED)
+
+# -----------------------------------------
+# Add modules
+# -----------------------------------------
+add_subdirectory(modules/core)
+add_subdirectory(modules/logger)
+
+# Add object files from modules
+target_sources(helios PRIVATE
+    $<TARGET_OBJECTS:core>
+    $<TARGET_OBJECTS:logger>
 )
 
-# Link with the standard threads library
-find_package(Threads REQUIRED)
-target_link_libraries(helios PRIVATE Threads::Threads)
-
-# Define the location of the headers
-target_include_directories(helios PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include/helios>
+# -----------------------------------------
+# Includes
+# -----------------------------------------
+target_include_directories(helios
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/modules>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen>
+        $<INSTALL_INTERFACE:include/helios>
 )
 
-target_include_directories(helios PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-# Install headers and the library
-install(DIRECTORY include/
+# -----------------------------------------
+# Install headers
+# Each module installs its own headers inside include/helios/<module>/
+# -----------------------------------------
+install(DIRECTORY modules/
     DESTINATION include/helios
+    FILES_MATCHING
+        PATTERN "include/*"
 )
 
+# -----------------------------------------
+# Install the shared library
+# -----------------------------------------
 install(TARGETS helios
     EXPORT HeliosTargets
     LIBRARY DESTINATION lib
 )
 
-# Install CMake package files so find_package(Helios) works
+# -----------------------------------------
+# CMake package configuration
+# -----------------------------------------
 include(CMakePackageConfigHelpers)
 
 set(CONFIG_INSTALL_DIR lib/cmake/Helios)
 
-# Generate version file (HeliosConfigVersion.cmake)
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/HeliosConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-# Generate main config file (HeliosConfig.cmake)
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HeliosConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/HeliosConfig.cmake"
     INSTALL_DESTINATION ${CONFIG_INSTALL_DIR}
 )
 
-# Install both config files
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/HeliosConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/HeliosConfigVersion.cmake"
     DESTINATION ${CONFIG_INSTALL_DIR}
 )
 
-# Install the exported target file (HeliosTargets.cmake)
 install(EXPORT HeliosTargets
     FILE HeliosTargets.cmake
     NAMESPACE Helios::
     DESTINATION ${CONFIG_INSTALL_DIR}
 )
-
-option(BUILD_TESTS "Build unit tests" ON)
-
-if (BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
