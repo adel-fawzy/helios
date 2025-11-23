@@ -21,7 +21,7 @@ constexpr std::chrono::seconds FIVE_SECONDS{5};
 
 } // namespace
 
-namespace helios::core::event_queue {
+namespace helios::core {
 /**
  * @test
  * @brief Tests the normal scenario.
@@ -121,4 +121,4 @@ TEST(TestEventQueue, BlockingWhenThereAreNoEventsInTheQueue) {
   handlerThread.join();
 }
 
-} // namespace helios::core::event_queue
+} // namespace helios::core

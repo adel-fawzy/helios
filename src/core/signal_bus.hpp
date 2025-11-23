@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "core/isignal_bus.hpp"
-#include "core/id.hpp"
+#include "id.hpp"
 
 namespace helios::core {
 

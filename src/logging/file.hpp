@@ -6,6 +6,8 @@
 namespace helios::logging {
 
 /**
+ * @class FileSink
+ * 
  * @brief Appends a given message to a given file path.
  */
 class File : public IFile {
@@ -27,7 +29,7 @@ private:
   /**
    * @brief Path of the file to be appended.
    */
-  const std::string path_;
+  // const std::string path_;
 
   /**
    * @brief File stream.

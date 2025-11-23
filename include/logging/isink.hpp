@@ -6,7 +6,7 @@
 namespace helios::logging {
 
 /**
- * @class logging::sink::Interface
+ * @class logging::ISink
  *
  * @brief Logs a message to a sink.
  *

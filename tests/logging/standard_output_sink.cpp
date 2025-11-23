@@ -6,7 +6,7 @@
 
 #include "core/event_queue.hpp"
 
-namespace helios::logging::sink {
+namespace helios::logging {
 
 class Test_StandardOutputSink_Env : public ::testing::Test {
 public:
@@ -92,4 +92,4 @@ TEST_F(Test_StandardOutputSink_Env, EmptyMessageIsStoredInBuffer) {
   ASSERT_EQ(getResult(), msg);
 }
 
-} // namespace helios::logging::sink
+} // namespace helios::logging

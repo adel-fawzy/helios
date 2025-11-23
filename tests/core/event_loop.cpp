@@ -217,4 +217,4 @@ TEST(TestEventLoop, StartAndStopMultipleTimes) {
   }
 }
 
-} // namespace helios::core::event_loop
+} // namespace helios::core

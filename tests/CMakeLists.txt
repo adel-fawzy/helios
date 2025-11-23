@@ -14,6 +14,7 @@ add_executable(helios_tests
     core/module.cpp
     logging/standard_output_sink.cpp
     logging/file_sink.cpp
+    logging/logger.cpp
 )
 
 target_include_directories(helios_tests PRIVATE

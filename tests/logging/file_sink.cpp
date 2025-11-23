@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <gtest/gtest.h>
-#include <iostream>
 #include <filesystem>
 
 #include "core/event_queue.hpp"
@@ -17,7 +16,7 @@ const std::string TEST_FILE_PATH{"test_file_sink_output"};
 
 } // namespace
 
-namespace helios::logging::sink {
+namespace helios::logging {
 
 class Test_FileSink_Env : public ::testing::Test {
 public:
@@ -85,7 +84,7 @@ private:
 TEST_F(Test_FileSink_Env, MessageIsStoredInGivenFile) {
   std::string msg{"Hello World!\n"};
   write(msg);
-  ASSERT_EQ(getResult(), msg);
+  EXPECT_EQ(getResult(), msg);
 }
 
 /**
@@ -101,7 +100,7 @@ TEST_F(Test_FileSink_Env, MessageIsStoredInGivenFile) {
 TEST_F(Test_FileSink_Env, EmptyMessageIsStoredInGivenFile) {
   std::string msg{""};
   write(msg);
-  ASSERT_EQ(getResult(), msg);
+  EXPECT_EQ(getResult(), msg);
 }
 
-} // namespace helios::logging::sink
+} // namespace helios::logging

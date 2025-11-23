@@ -4,7 +4,7 @@
 
 #include "core/ievent_queue.hpp"
 #include "core/module.hpp"
-#include "logging/ifile.hpp"
+#include "ifile.hpp"
 #include "logging/isink.hpp"
 
 namespace helios::logging {

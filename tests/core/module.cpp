@@ -5,7 +5,7 @@
 #include "core/mock_event_queue.hpp"
 #include "core/mock_signal_bus.hpp"
 
-namespace helios::core::module {
+namespace helios::core {
 
 // Create a class to expose the protected functions of the class under test
 class ModuleUnderTest : public Module {
@@ -147,4 +147,4 @@ TEST(TestModule, UnsubscribeOnDestruction) {
   ModuleUnderTest m(queueMockPtr, signalBusMockPtr);
 }
 
-} // namespace helios::core::module
+} // namespace helios::core

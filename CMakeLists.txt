@@ -6,9 +6,9 @@ project(Helios VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#
-# 1. Create the shared library
-#
+include(cmake/LoggerConfig.cmake)
+
+# Create the shared library
 add_library(helios SHARED
     src/core/event_queue.cpp
     src/core/signal_bus.cpp
@@ -16,15 +16,20 @@ add_library(helios SHARED
     src/logging/standard_output_sink.cpp
     src/logging/file_sink.cpp
     src/logging/file.cpp
+    src/logging/default_logger_factory.cpp
+    src/logging/logger.cpp
+    src/logging/log_message.cpp
 )
 
 # Link with the standard threads library
 find_package(Threads REQUIRED)
 target_link_libraries(helios PRIVATE Threads::Threads)
 
-# Tell consumers where headers are
+# Define the location of the headers
 target_include_directories(helios PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:include/helios>
 )
 
@@ -32,9 +37,7 @@ target_include_directories(helios PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-#
-# 2. Install headers and the library
-#
+# Install headers and the library
 install(DIRECTORY include/
     DESTINATION include/helios
 )
@@ -44,9 +47,7 @@ install(TARGETS helios
     LIBRARY DESTINATION lib
 )
 
-#
-# 3. Install CMake package files so find_package(Helios) works
-#
+# Install CMake package files so find_package(Helios) works
 include(CMakePackageConfigHelpers)
 
 set(CONFIG_INSTALL_DIR lib/cmake/Helios)
@@ -79,7 +80,7 @@ install(EXPORT HeliosTargets
     DESTINATION ${CONFIG_INSTALL_DIR}
 )
 
-option(BUILD_TESTS "Build unit tests" OFF)
+option(BUILD_TESTS "Build unit tests" ON)
 
 if (BUILD_TESTS)
     enable_testing()
