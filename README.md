@@ -9,4 +9,3 @@ It provides:
 - A foundation suitable for **robotics**, **autonomy**, **simulation**, **embedded systems**, or any reactive application
 
 Helios is designed to be simple, composable, and easy to integrate into larger projects.
-

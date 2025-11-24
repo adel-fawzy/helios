@@ -1,12 +1,6 @@
-#include "event_queue.hpp"
+#include "core/event_queue.hpp"
 
 namespace helios::core {
-
-void EventQueue::post(Event event) {
-  std::lock_guard<std::mutex> lock(mtx_);
-  queue_.push(std::move(event));
-  cv_.notify_one();
-}
 
 bool EventQueue::tryPopAndExecute() {
   std::function<void()> f;

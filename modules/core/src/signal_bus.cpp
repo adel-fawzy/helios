@@ -39,7 +39,7 @@ private:
   std::mutex mtx_;
 }; // class SignalBus::Impl
 
-SignalBus::SignalBus() = default;
+SignalBus::SignalBus() : impl_{std::make_unique<Impl>()} {}
 
 SignalBus::~SignalBus() = default;
 

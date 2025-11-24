@@ -78,7 +78,7 @@ private:
   bool anyQueueHasWork();
 }; // class EventLoop::Impl
 
-EventLoop::EventLoop() = default;
+EventLoop::EventLoop() : impl_{std::make_unique<Impl>()} {}
 
 EventLoop::~EventLoop() { impl_->stop(); }
 

@@ -5,7 +5,7 @@
 #include <mutex>
 #include <queue>
 
-#include "core/event.hpp"
+#include "event.hpp"
 
 namespace helios::core {
 
@@ -41,9 +41,14 @@ public:
   /**
    * @brief Adds an event to the queue.
    *
+   * @tparam E Type of Event to add.
    * @param event Event to be added.
    */
-  void post(Event event);
+  template <typename E> void post(E &&event) {
+    std::lock_guard<std::mutex> lock(mtx_);
+    queue_.push(std::forward<E>(event));
+    cv_.notify_one();
+  }
 
   /**
    * @brief Handles the first event in the queue and then returns.

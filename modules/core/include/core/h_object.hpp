@@ -10,50 +10,64 @@ namespace helios::core {
 /**
  * @class core::HObject
  *
- * @brief Concrete implementation of a HObject.
+ * @brief Provides its derived classes asynchronous event handling.
  *
  * @details
- * - When 'HObject::add' function is called, the class shall call
- *   'event_queue::Interface::push' to add an event to the event queue.
- * - When 'HObject::subscribeSignal' function is called, the class shall call
- *   'signal_bus::Interface::subscribe' to subscribe to the signal.
- * - When 'HObject::publishSignal' function is called, the class shall call
- *   'signal_bus::Interface::publish' to publish the signal.
- * - When 'HObject::~HObject' is called, the class shall call
- *   'signal_bus::Interface::unsubscribe' to unsubscribe from the signals that
- *   it subscribed to.
- * - The signal bus is optional. A HObject can live without a signal bus but it
- *   cannot live without an event queue.
+ * - The main functionality of this class is that it lets its derived classes
+ *   handle their events asynchronously using the post() function.
+ * - It has a unique ID that is used when listening to and unlistening from
+ *   signals on the signal bus.
+ * - It can live with or without a signal bus.
+ * - The derived classes can use listen() and unlisten() functions to
+ *   communicate on the bus.
+ *
+ * @note
+ * - All public functions are synchronous.
+ * - All public functions are thread-safe.
  */
 class HObject {
 public:
   /**
    * @brief Constructor.
+   *
+   * @param signalBus Optional shared pointer to the signal bus.
    */
-  HObject(std::shared_ptr<SignalBus> signalBus = nullptr)
-      : signalBus_(signalBus), id_(++nextId_) {}
+  HObject(std::shared_ptr<SignalBus> signalBus = nullptr);
 
   /**
    * @brief Virtual destructor.
    */
-  virtual ~HObject() {
-    if (signalBus_)
-      signalBus_->unlisten(nextId_);
-  }
+  virtual ~HObject();
 
-  bool tryPopAndExecute() { return eventQueue_.tryPopAndExecute(); }
+  /**
+   * @brief Handles the first event in the event queue and then returns true.
+   *
+   * @details
+   * - If there are no events in the event queue, then it will immediately
+   *   return false.
+   * - If an event is handled, it will be popped from the event queue so that it
+   *   is not handled again.
+   *
+   * @return true if an event is handled, false otherwise.
+   */
+  bool tryPopAndExecute();
 
-  bool hasEvents() { return !eventQueue_.empty(); }
+  /**
+   * @brief Checks if there is at least one event in the event queue.
+   *
+   * @return true if there is at least one event in the event queue, false
+   *         otherwise.
+   */
+  bool hasEvents();
 
 protected:
   /**
-   * @brief Adds an event to the HObject's event queue.
+   * @brief Adds an event to the event queue.
    *
-   * @param event The event to be added.
+   * @param e Event to be added.
    */
-  // template <typename E> void add(E &&event) {
-  //   eventQueue_->push(std::forward<E>(event));
-  // }
+  void post(const Event &e);
+  void post(Event &&e);
 
   /**
    * @brief Listens to a signal type.
