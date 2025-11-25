@@ -20,6 +20,4 @@ target_include_directories(logger PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen/logger
 
 target_link_libraries(logger PUBLIC core)
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)

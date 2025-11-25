@@ -53,9 +53,10 @@ public:
   void start();
 
   /**
-   * @brief Stops handling events from all HObjects.
+   * @brief When called, waits for all events added to be handled first and then
+   *        stops the event loop thread.
    */
-  void stop();
+  void stopAndWait();
 
 private:
   /**

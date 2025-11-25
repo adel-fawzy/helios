@@ -1,6 +1,8 @@
 #pragma once
 
+#include <functional>
 #include <memory>
+#include <mutex>
 
 #include "event_queue.hpp"
 #include "signal_bus.hpp"
@@ -70,6 +72,18 @@ protected:
   void post(Event &&e);
 
   /**
+   * @brief Subscribes to know when a new event is added.
+   *
+   * @param cb Callback.
+   */
+  void subscribe(std::function<void()> cb);
+
+  /**
+   * @brief Unubscribes.
+   */
+  void unsubscribe();
+
+  /**
    * @brief Listens to a signal type.
    *
    * @tparam SignalT The signal type to listen to.
@@ -84,12 +98,12 @@ protected:
   /**
    * @brief Publishes a signal to the signal bus.
    *
-   * @tparam SignalT The signal type to publish.
+   * @tparam SignalType The signal type to publish.
    * @param s The signal instance to publish.
    */
-  template <typename SignalT> void publish(SignalT s) {
+  template <typename SignalType> void publish(SignalType &&s) {
     if (signalBus_)
-      signalBus_->publish<SignalT>(s);
+      signalBus_->publish<SignalType>(std::forward<SignalType>(s));
   }
 
 private:
@@ -112,6 +126,29 @@ private:
    * @brief Unique HObject ID.
    */
   const ID id_;
+
+  /**
+   * @brief Protects this class.
+   */
+  std::mutex mtx_;
+
+  /**
+   * @brief Callback used by subscribers who want to know whenever a new event
+   *        is added.
+   */
+  std::function<void()> subscriber_;
+
+  /**
+   * @brief Notifies the subscriber that a new event is posted.
+   */
+  void notify();
+
+  /**
+   * @brief EventLoop uses the protected post() function in order wait until all
+   *        events posted in the queue before EventLoop::stop() is called are
+   *        handled.
+   */
+  friend class EventLoop;
 }; // class HObject
 
 } // namespace helios::core

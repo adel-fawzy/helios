@@ -67,11 +67,11 @@ public:
    * @brief Publishes a signal on the bus.
    *
    * @tparam SignalType Type of the published signal.
-   * @param signal The signal publishes.
+   * @param s The published signal.
    */
   template <typename SignalType>
-  void publish(std::shared_ptr<const SignalType> signal) {
-    publishImpl(typeid(SignalType), std::move(signal));
+  void publish(const SignalType& s) {
+    publishImpl(typeid(SignalType), std::make_shared<const SignalType>(s));
   }
 
   /**

@@ -16,8 +16,5 @@ target_link_libraries(core PRIVATE Threads::Threads)
 target_include_directories(core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-# target_include_directories(core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)

@@ -7,9 +7,10 @@ FetchContent_Declare(
 set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(test_module test_module.cpp)
+add_executable(core_tests hobject_test.cpp event_loop_test.cpp)
 
-target_link_libraries(test_module PRIVATE logger GTest::gtest GTest::gtest_main)
+target_link_libraries(core_tests PRIVATE core GTest::gtest GTest::gtest_main)
 
+# Register with CTest
 include(GoogleTest)
-gtest_discover_tests(test_module)
+gtest_discover_tests(core_tests)

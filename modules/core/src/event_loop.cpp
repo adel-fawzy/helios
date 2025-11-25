@@ -2,17 +2,18 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <future>
 #include <mutex>
 #include <thread>
 #include <vector>
-
+#include <iostream>
 namespace helios::core {
 
 class EventLoop::Impl {
 public:
   void add(std::shared_ptr<HObject> obj);
   void start();
-  void stop();
+  void stopAndWait();
 
 private:
   /**
@@ -43,9 +44,17 @@ private:
   std::atomic<bool> running_{false};
 
   /**
-   * @brief Main function that runs the loop.
+   * @brief Set to true when the loop is stopped.
    */
-  void runLoop();
+  std::atomic<bool> stopping_{false};
+
+  /**
+   * @brief Main function that runs the loop.
+   *
+   * @param p Promise used to indicate to the thread that started the event loop
+   *          that the thread has started successfully.
+   */
+  void runLoop(std::promise<void> &p);
 
   /**
    * @brief Executes one event from each HObject.
@@ -76,22 +85,29 @@ private:
    *         otherwise.
    */
   bool anyQueueHasWork();
+
+  /**
+   * @brief Flushes all HObjects that have events that were posted before
+   * stopAndWait() was called.
+   */
+  void flushQueues();
 }; // class EventLoop::Impl
 
 EventLoop::EventLoop() : impl_{std::make_unique<Impl>()} {}
 
-EventLoop::~EventLoop() { impl_->stop(); }
+EventLoop::~EventLoop() { impl_->stopAndWait(); }
 
 void EventLoop::add(std::shared_ptr<HObject> obj) { impl_->add(obj); }
 
 void EventLoop::start() { impl_->start(); }
 
-void EventLoop::stop() { impl_->stop(); }
+void EventLoop::stopAndWait() { impl_->stopAndWait(); }
 
 void EventLoop::Impl::add(std::shared_ptr<HObject> obj) {
   {
     std::lock_guard<std::mutex> lock(mtx_);
     objects_.push_back(obj);
+    obj->subscribe([this] { cv_.notify_one(); });
   }
   cv_.notify_one();
 }
@@ -99,18 +115,49 @@ void EventLoop::Impl::add(std::shared_ptr<HObject> obj) {
 void EventLoop::Impl::start() {
   bool expected = false;
   if (running_.compare_exchange_strong(expected, true)) {
-    thread_ = std::thread([this] { runLoop(); });
+    std::promise<void> p;
+    std::future<void> f = p.get_future();
+    thread_ = std::thread([this, p = std::move(p)]() mutable { runLoop(p); });
+    f.get(); // Wait for the thread of the event loop to start
   }
 }
 
-void EventLoop::Impl::stop() {
-  running_ = false;
-  cv_.notify_one();
-  if (thread_.joinable())
+void EventLoop::Impl::stopAndWait() {
+  if (!running_) {
+    std::cout << "event loop is not running" << std::endl;
+    return;
+  }
+  std::cout << "event loop is running" << std::endl;
+  bool expected = false;
+  if (!stopping_.compare_exchange_strong(expected, true)) {
+    // Stop already in progress or done
+    if (thread_.joinable()) {
+      if (running_.load(std::memory_order_acquire)) {
+        cv_.notify_one();
+      }
+      thread_.join();
+    }
+    return;
+  }
+  std::cout << "Flushing queues" << std::endl;
+  flushQueues();
+std::cout << "Flushed queues" << std::endl;
+  running_.store(false, std::memory_order_release); // Stop the thread
+
+  cv_.notify_one(); // Notify the thread in case it is sleeping
+
+  if (thread_.joinable()) {
+    // std::cout << "Joining thread" << std::endl;
     thread_.join();
+    // std::cout << "Joined thread" << std::endl;
+  }
+
+  stopping_ = false; // Reset
 }
 
-void EventLoop::Impl::runLoop() {
+void EventLoop::Impl::runLoop(std::promise<void> &p) {
+  p.set_value();
+
   while (running_) {
     bool didWork = dispatchOnce();
 
@@ -120,7 +167,7 @@ void EventLoop::Impl::runLoop() {
 }
 
 bool EventLoop::Impl::dispatchOnce() {
-  auto snapshot = collectAliveObjects();
+  std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
 
   bool didWork = false;
   for (auto &obj : snapshot) {
@@ -161,6 +208,28 @@ bool EventLoop::Impl::anyQueueHasWork() {
       return s->hasEvents();
     return false;
   });
+}
+
+void EventLoop::Impl::flushQueues() {
+  std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
+  std::vector<std::future<void>> futures;
+  futures.reserve(snapshot.size());
+  for (auto &obj : snapshot) {
+    auto p = std::make_shared<std::promise<void>>();
+    futures.push_back(p->get_future());
+    auto stopEvent = [this, p]() mutable {
+      p->set_value();
+    };
+    obj->post(std::move(stopEvent)); // Add a stop event to the HObject
+  }
+  cv_.notify_one(); // Wake loop thread in case it is sleeping
+  // Wait for all HObjects stop events to be executed
+  for (auto &f : futures) {
+    f.get();
+  }
+  for (auto &obj : snapshot) {
+    obj->unsubscribe();
+  }
 }
 
 } // namespace helios::core
