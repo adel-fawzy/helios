@@ -1,5 +1,6 @@
 #pragma once
 
+#include <initializer_list>
 #include <memory>
 
 #include "h_object.hpp"
@@ -12,10 +13,11 @@ namespace helios::core {
  * @brief Runs one or more HObjects in a separate thread.
  *
  * @details
- * - When start() is called, will keep on running all events from all HObjects.
+ * - When run() is called, will keep on running all events from all HObjects.
  * - When stop() is called, will stop running the events from all HObjects.
  * - If there are no events in any HObject, will sleep until the first event in
  *   any HObbject is added.
+ *
  * @note
  * - All public functions are synchronous.
  * - All public functions are not thread-safe.
@@ -48,15 +50,31 @@ public:
   void add(std::shared_ptr<HObject> obj);
 
   /**
-   * @brief Starts handling events from all HObjects.
+   * @brief Adds more than one HObject to the loop.
+   *
+   * @param objs List of shared pointers to HObjects.
    */
-  void start();
+  void add(std::initializer_list<std::shared_ptr<HObject>> objs);
 
   /**
-   * @brief When called, waits for all events added to be handled first and then
-   *        stops the event loop thread.
+   * @brief Runs all HObjects in a separate thread.
+   *
+   * @details
+   * - Blocks until the thread is actually started.
+   * - Silently returns if the thread is already running.
    */
-  void stopAndWait();
+  void run();
+
+  /**
+   * @brief Stops the thread and closes it.
+   *
+   * @details
+   * - Handles all events of HObjects that were added to them before the call to
+   *   this function.
+   * - Then stops the thread and closes it.
+   * - Blocks until the thread is closed.
+   */
+  void stop();
 
 private:
   /**

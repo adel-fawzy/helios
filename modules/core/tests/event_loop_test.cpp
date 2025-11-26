@@ -49,10 +49,10 @@ TEST(EventLoopTest, HandleOneHObject) {
   helios::core::EventLoop loop;
   auto c = std::make_shared<Calculator>();
   loop.add(c);
-  loop.start();
+  loop.run();
   int actual{};
   c->add(2, 3, [&actual](auto result) { actual = result; });
-  loop.stopAndWait();
+  loop.stop();
   EXPECT_EQ(actual, 5);
 }
 
@@ -61,30 +61,23 @@ TEST(EventLoopTest, StartAndStopMultipleTimes) {
   auto pu = std::make_shared<Publisher>(sb);
   auto li = std::make_shared<Listener>(sb);
   helios::core::EventLoop el;
-  el.add(pu);
-  el.add(li);
+  el.add({pu, li});
   std::thread t{[&pu] {
     for (int i{}; i < 10; ++i) {
       pu->startPublish(i);
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   }};
-  std::cout << "Test thread starting event loop..." << std::endl;
-  el.start();
-  std::cout << "Test thread sleeping..." << std::endl;
+
+  el.run();
   std::this_thread::sleep_for(std::chrono::milliseconds(2));
-  std::cout << "Test thread stopping event loop..." << std::endl;
-  el.stopAndWait();
-  std::cout << "Test thread starting event loop..." << std::endl;
-  el.start();
-  std::cout << "Test thread sleeping..." << std::endl;
+  el.stop();
+
+  el.run();
   std::this_thread::sleep_for(std::chrono::milliseconds(2));
-  std::cout << "Test thread stopping event loop..." << std::endl;
-  el.stopAndWait();
-  std::cout << "Test thread starting event loop..." << std::endl;
-  el.start();
-  std::cout << "Joining t" << std::endl;
+  el.stop();
+
+  el.run();
   t.join();
-  std::cout << "Joined t" << std::endl;
-  el.start();
+  el.run(); 
 }

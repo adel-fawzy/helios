@@ -7,7 +7,9 @@ FetchContent_Declare(
 set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(core_tests hobject_test.cpp event_loop_test.cpp)
+add_executable(core_tests hobject_test.cpp long_running_thread_test.cpp event_loop_test.cpp)
+
+target_include_directories(core_tests PRIVATE ${CMAKE_SOURCE_DIR}/modules/core/)
 
 target_link_libraries(core_tests PRIVATE core GTest::gtest GTest::gtest_main)
 

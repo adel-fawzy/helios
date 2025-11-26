@@ -1,19 +1,25 @@
 #include "core/event_loop.hpp"
 
+#include "long_running_thread.hpp"
+
 #include <atomic>
 #include <condition_variable>
 #include <future>
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <iostream>
+
 namespace helios::core {
 
 class EventLoop::Impl {
 public:
+  Impl() = default;
+  ~Impl();
   void add(std::shared_ptr<HObject> obj);
-  void start();
-  void stopAndWait();
+  void add(std::initializer_list<std::shared_ptr<HObject>> objs);
+
+  void run();
+  void stop();
 
 private:
   /**
@@ -35,29 +41,21 @@ private:
   /**
    * @brief Event loop thread.
    */
-  std::thread thread_;
+  LongRunningThread t_;
 
   /**
-   * @brief Set to true when the thread is running. Set to false to stop the
-   *        thread.
+   * @brief Set to true when a stop is issued. Reset after the thread is
+   *        stopped.
    */
-  std::atomic<bool> running_{false};
+  std::atomic<bool> isStopIssued_{false};
 
   /**
-   * @brief Set to true when the loop is stopped.
+   * @brief Keeps on looping until all events from all HObjects are handled.
    */
-  std::atomic<bool> stopping_{false};
+  void handleEvents();
 
   /**
-   * @brief Main function that runs the loop.
-   *
-   * @param p Promise used to indicate to the thread that started the event loop
-   *          that the thread has started successfully.
-   */
-  void runLoop(std::promise<void> &p);
-
-  /**
-   * @brief Executes one event from each HObject.
+   * @brief Loops on all current HObjects and then executes one event from each.
    *
    * @return True if at least one event is executed. False if no events were
    *         executed from any HObject.
@@ -87,89 +85,79 @@ private:
   bool anyQueueHasWork();
 
   /**
-   * @brief Flushes all HObjects that have events that were posted before
-   * stopAndWait() was called.
+   * @brief Adds stop events to all HObjects and then waits for them to be
+   *        executed.
+   *
+   * @param snapshot Current available HObjects.
    */
-  void flushQueues();
+  void flushQueues(std::vector<std::shared_ptr<HObject>> &snapshot);
+
+  /**
+   * @brief Unsubscribes from all HObjects.
+   */
+  void unsubscribe();
 }; // class EventLoop::Impl
 
 EventLoop::EventLoop() : impl_{std::make_unique<Impl>()} {}
 
-EventLoop::~EventLoop() { impl_->stopAndWait(); }
+EventLoop::~EventLoop() = default;
+
+EventLoop::Impl::~Impl() {
+  stop();
+  unsubscribe();
+}
 
 void EventLoop::add(std::shared_ptr<HObject> obj) { impl_->add(obj); }
 
-void EventLoop::start() { impl_->start(); }
+void EventLoop::add(std::initializer_list<std::shared_ptr<HObject>> objs) {
+  impl_->add(std::move(objs));
+}
 
-void EventLoop::stopAndWait() { impl_->stopAndWait(); }
+void EventLoop::run() { impl_->run(); }
+
+void EventLoop::stop() { impl_->stop(); }
 
 void EventLoop::Impl::add(std::shared_ptr<HObject> obj) {
-  {
-    std::lock_guard<std::mutex> lock(mtx_);
-    objects_.push_back(obj);
-    obj->subscribe([this] { cv_.notify_one(); });
-  }
-  cv_.notify_one();
+  objects_.push_back(obj);
+  obj->subscribe([this] { t_.notify(); });
 }
 
-void EventLoop::Impl::start() {
-  bool expected = false;
-  if (running_.compare_exchange_strong(expected, true)) {
-    std::promise<void> p;
-    std::future<void> f = p.get_future();
-    thread_ = std::thread([this, p = std::move(p)]() mutable { runLoop(p); });
-    f.get(); // Wait for the thread of the event loop to start
+void EventLoop::Impl::add(
+    std::initializer_list<std::shared_ptr<HObject>> objs) {
+  for (auto &obj : objs) {
+    add(obj);
   }
 }
 
-void EventLoop::Impl::stopAndWait() {
-  if (!running_) {
-    std::cout << "event loop is not running" << std::endl;
-    return;
-  }
-  std::cout << "event loop is running" << std::endl;
-  bool expected = false;
-  if (!stopping_.compare_exchange_strong(expected, true)) {
-    // Stop already in progress or done
-    if (thread_.joinable()) {
-      if (running_.load(std::memory_order_acquire)) {
-        cv_.notify_one();
-      }
-      thread_.join();
-    }
-    return;
-  }
-  std::cout << "Flushing queues" << std::endl;
-  flushQueues();
-std::cout << "Flushed queues" << std::endl;
-  running_.store(false, std::memory_order_release); // Stop the thread
-
-  cv_.notify_one(); // Notify the thread in case it is sleeping
-
-  if (thread_.joinable()) {
-    // std::cout << "Joining thread" << std::endl;
-    thread_.join();
-    // std::cout << "Joined thread" << std::endl;
-  }
-
-  stopping_ = false; // Reset
+void EventLoop::Impl::run() {
+  // Start thread if not already started
+  t_.start(
+      // WORK
+      [this] { handleEvents(); },
+      // PREDICATE
+      [this] {
+        std::lock_guard<std::mutex> lock(mtx_);
+        return anyQueueHasWork();
+      });
 }
 
-void EventLoop::Impl::runLoop(std::promise<void> &p) {
-  p.set_value();
+void EventLoop::Impl::stop() {
+  std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
+  flushQueues(snapshot);
+  t_.stop();
+}
 
-  while (running_) {
-    bool didWork = dispatchOnce();
-
-    if (!didWork)
-      waitForEvents();
+void EventLoop::Impl::handleEvents() {
+  while (dispatchOnce()) {
+    // Loop until all events from all HObjects are handled
   }
 }
 
 bool EventLoop::Impl::dispatchOnce() {
   std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
 
-  bool didWork = false;
+  bool didWork{false};
+
   for (auto &obj : snapshot) {
     if (obj->tryPopAndExecute())
       didWork = true;
@@ -197,11 +185,6 @@ std::vector<std::shared_ptr<HObject>> EventLoop::Impl::collectAliveObjects() {
   return snapshot;
 }
 
-void EventLoop::Impl::waitForEvents() {
-  std::unique_lock<std::mutex> lock(mtx_);
-  cv_.wait(lock, [this] { return !running_ || anyQueueHasWork(); });
-}
-
 bool EventLoop::Impl::anyQueueHasWork() {
   return std::any_of(objects_.begin(), objects_.end(), [](auto &w) {
     if (auto s = w.lock())
@@ -210,16 +193,14 @@ bool EventLoop::Impl::anyQueueHasWork() {
   });
 }
 
-void EventLoop::Impl::flushQueues() {
-  std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
+void EventLoop::Impl::flushQueues(
+    std::vector<std::shared_ptr<HObject>> &snapshot) {
   std::vector<std::future<void>> futures;
   futures.reserve(snapshot.size());
   for (auto &obj : snapshot) {
     auto p = std::make_shared<std::promise<void>>();
     futures.push_back(p->get_future());
-    auto stopEvent = [this, p]() mutable {
-      p->set_value();
-    };
+    auto stopEvent = [this, p]() mutable { p->set_value(); };
     obj->post(std::move(stopEvent)); // Add a stop event to the HObject
   }
   cv_.notify_one(); // Wake loop thread in case it is sleeping
@@ -227,9 +208,12 @@ void EventLoop::Impl::flushQueues() {
   for (auto &f : futures) {
     f.get();
   }
-  for (auto &obj : snapshot) {
+}
+
+void EventLoop::Impl::unsubscribe() {
+  std::vector<std::shared_ptr<HObject>> snapshot = collectAliveObjects();
+  for (auto &obj : snapshot)
     obj->unsubscribe();
-  }
 }
 
 } // namespace helios::core

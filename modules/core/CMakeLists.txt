@@ -7,6 +7,7 @@ target_sources(core PRIVATE
     src/event_queue.cpp
     src/signal_bus.cpp
     src/h_object.cpp
+    src/long_running_thread.cpp
 )
 
 # Private dependencies
