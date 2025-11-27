@@ -1,7 +1,8 @@
+#include "logger/logger.hpp"
+
 #include <gtest/gtest.h>
 
 #include "logger/log_macros.hpp"
-#include "logger/logger.hpp"
 
 TEST(LoggerTest, DebugNoMacros) {
   helios::logger::Logger logger_("LoggerTest");
