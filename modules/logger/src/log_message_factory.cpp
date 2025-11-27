@@ -1,8 +1,7 @@
-#include "log_message_factory.hpp"
-
-#include <iomanip>
+#include "logger/log_message_factory.hpp"
 
 #include "log_message.hpp"
+#include <iomanip>
 
 namespace {
 
@@ -28,15 +27,11 @@ const char *levelToString(helios::logger::LogLevel lvl) {
 namespace helios::logger {
 
 LogMessageFactory::LogMessageFactory(LogLevel level, std::string tag,
-                                     std::shared_ptr<core::SignalBus> signalBus)
-    : level_(level), tag_(std::move(tag)), signalBus_(signalBus),
+                                     std::function<void(std::string)> cb)
+    : level_(level), tag_(std::move(tag)), cb_(cb),
       timestamp_(std::chrono::system_clock::now()) {}
 
-LogMessageFactory::~LogMessageFactory() { publish(); }
-
-void LogMessageFactory::publish() {
-  signalBus_->publish<LogMessage>(LogMessage{format()});
-}
+LogMessageFactory::~LogMessageFactory() { cb_(format()); }
 
 std::string LogMessageFactory::format() const {
   std::ostringstream final;

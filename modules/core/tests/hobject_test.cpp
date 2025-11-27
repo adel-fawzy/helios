@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "core/h_object.hpp"
+
+#include <gtest/gtest.h>
 
 namespace {
 

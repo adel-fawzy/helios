@@ -69,9 +69,9 @@ public:
    * @tparam SignalType Type of the published signal.
    * @param s The published signal.
    */
-  template <typename SignalType>
-  void publish(const SignalType& s) {
-    publishImpl(typeid(SignalType), std::make_shared<const SignalType>(s));
+  template <typename SignalType> void publish(SignalType &&s) {
+    using T = std::remove_cv_t<std::remove_reference_t<SignalType>>;
+    publishImpl(typeid(T), std::make_shared<T>(std::forward<SignalType>(s)));
   }
 
   /**

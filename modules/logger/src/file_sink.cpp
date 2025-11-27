@@ -1,5 +1,4 @@
 #include "file_sink.hpp"
-
 #include "log_message.hpp"
 
 namespace {
@@ -20,13 +19,12 @@ void write(const std::string &s, std::ofstream &file) {
 
 namespace helios::logger {
 
-FileSink::FileSink(std::shared_ptr<core::IEventQueue> eventQueue,
-                   std::shared_ptr<core::SignalBus> signalBus,
+FileSink::FileSink(std::shared_ptr<core::SignalBus> signalBus,
                    const std::string &filePath)
-    : Module{eventQueue, signalBus}, file_{filePath} {
+    : HObject{signalBus}, file_{filePath} {
   listen<LogMessage>([this](auto logMessage) {
     auto e = [this, msg = logMessage->msg] { write(msg, file_); };
-    add(e);
+    post(e);
   });
 }
 

@@ -1,9 +1,7 @@
 #pragma once
 
+#include <core/h_object.hpp>
 #include <memory>
-
-#include "core/ievent_queue.hpp"
-#include "core/module.hpp"
 
 namespace helios::logger {
 
@@ -15,21 +13,19 @@ namespace helios::logger {
  * @details
  * - Does not make any modifications to the message, not even adding a new line.
  */
-class StandardOutputSink : public core::Module {
+class StandardOutputSink : public core::HObject {
 public:
   /**
    * @brief Constructor.
    *
-   * @param eventQueue Event queue used by this class.
-   * @param signalBus Bus used for listening to the log messages.
+   * @param signalBus Bus used for log messages.
    */
-  StandardOutputSink(std::shared_ptr<core::IEventQueue> eventQueue,
-                     std::shared_ptr<core::SignalBus> signalBus);
+  StandardOutputSink(std::shared_ptr<core::SignalBus> signalBus);
 
   /**
-   * @brief Default destructor.
+   * @brief Default virtual destructor.
    */
-  virtual ~StandardOutputSink() override = default;
-};
+  ~StandardOutputSink() override = default;
+}; // class StandardOutputSink
 
 } // namespace helios::logger

@@ -1,22 +1,18 @@
 #pragma once
 
-#include "core/event_loop.hpp"
-#include "core/event_queue.hpp"
-#include "core/signal_bus.hpp"
-#include "file_sink.hpp"
-#include "log_macros.hpp"
+#include <memory>
+
 #include "log_message_factory.hpp"
-#include "standard_output_sink.hpp"
 
 namespace helios::logger {
 
 /**
  * @class logger::Logger
  *
- * @brief Logs a message to the available log sinks with a name.
+ * @brief Logs a message to the configured log sinks with a name.
  *
  * @details
- * - Provides public functions that return an empty log message to the user.
+ * - Provides public functions that return an empty log message to the client.
  * - The log message overloads operator<< to create log messages.
  * - When the log message is finished (deleted), the callback provided by this
  *   class will be called to start logging the message to the available log
@@ -38,9 +34,9 @@ public:
   Logger(std::string name);
 
   /**
-   * @brief Default destructor.
+   * @brief Destructor.
    */
-  ~Logger() = default;
+  ~Logger();
 
   /**
    * @brief Delete copy and move semantics.
@@ -57,51 +53,14 @@ public:
 
 private:
   /**
-   * @brief Name of the logger.
+   * @brief Forward decleration for the implementation class.
    */
-  const std::string name_;
+  class Impl;
 
   /**
-   * @brief Holds the events of this class to be handled later.
+   * @brief Unique pointer to the implementation class.
    */
-  static std::shared_ptr<core::EventQueue> eventQueue_;
-
-  /**
-   * @brief Runs the events in 'queue_'.
-   */
-  static core::EventLoop eventLoop_;
-
-  /**
-   * @brief Signal bus that holds the signals for logging.
-   */
-  static std::shared_ptr<core::SignalBus> signalBus_;
-
-  /**
-   * @brief Unique pointer to the standard output sink.
-   */
-  static std::unique_ptr<StandardOutputSink> stdOutSink_;
-
-  /**
-   * @brief Unique pointer to the file sink.
-   */
-  static std::unique_ptr<FileSink> fileSink_;
-
-  /**
-   * @brief Indicates if the log sinks are created or not yet.
-   */
-  static std::once_flag isSinksInitialized_;
-
-  /**
-   * @brief Checks the configured log sinks and creates them.
-   */
-  static void initSinks();
-
-  /**
-   * @brief Creates and returns a 'LogMessage'.
-   *
-   * @return 'LogMessage'.
-   */
-  LogMessageFactory make(LogLevel lvl);
+  std::unique_ptr<Impl> impl_;
 }; // class Logger
 
 } // namespace helios::logger

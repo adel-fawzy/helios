@@ -119,6 +119,9 @@ void EventLoop::stop() { impl_->stop(); }
 
 void EventLoop::Impl::add(std::shared_ptr<HObject> obj) {
   objects_.push_back(obj);
+  if (obj) {
+  } else {
+  }
   obj->subscribe([this] { t_.notify(); });
 }
 

@@ -6,15 +6,14 @@
 #include <sstream>
 #include <string>
 
-#include "core/signal_bus.hpp"
 #include "log_level.hpp"
 
 namespace helios::logger {
 
 /**
- * @class logger::LogMessage
+ * @class logger::LogMessageFactory
  *
- * @brief A log message that contains relevant information.
+ * @brief Creates a log message that contains relevant information.
  *
  * @details
  * - The log message contains the following:
@@ -22,6 +21,7 @@ namespace helios::logger {
  *    2. Tag
  *    3. Log level
  *    4. Log message
+ * - Calls the given callback to give it the message when it is finished.
  * - All public functions are not thread-safe.
  * - All public functions are synchronous.
  */
@@ -32,10 +32,10 @@ public:
    *
    * @param level Log level.
    * @param tag Tag name.
-   * @param signalBus Signal bus to publish final log message.
+   * @param cb Callback called when the message is finished.
    */
   LogMessageFactory(LogLevel level, std::string tag,
-                    std::shared_ptr<core::SignalBus> signalBus);
+                    std::function<void(std::string)> cb);
 
   /**
    * @brief Destructor.
@@ -49,7 +49,7 @@ public:
    */
   template <typename MessageType>
   LogMessageFactory &operator<<(const MessageType &value) {
-    buffer_ << value;
+    buffer_ << value << "\n";
     return *this;
   }
 
@@ -65,9 +65,9 @@ private:
   std::string tag_;
 
   /**
-   * @brief Used for publishing the final log message.
+   * @brief Callback called when the message is finished.
    */
-  std::shared_ptr<core::SignalBus> signalBus_;
+  std::function<void(std::string)> cb_;
 
   /**
    * @brief Time stamp when the object was created.
@@ -78,11 +78,6 @@ private:
    * @brief Buffer to hold the log message in between calls.
    */
   std::ostringstream buffer_;
-
-  /**
-   * @brief Publishes the final log message.
-   */
-  void publish();
 
   /**
    * @brief Formats 'buffer_'.

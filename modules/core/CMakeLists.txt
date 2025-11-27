@@ -1,21 +1,39 @@
-add_library(core OBJECT)
+add_library(core SHARED)
 
-set_target_properties(core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_sources(core
+    PRIVATE
+        src/event_loop.cpp
+        src/event_queue.cpp
+        src/signal_bus.cpp
+        src/h_object.cpp
+        src/long_running_thread.cpp
+)
 
-target_sources(core PRIVATE
-    src/event_loop.cpp
-    src/event_queue.cpp
-    src/signal_bus.cpp
-    src/h_object.cpp
-    src/long_running_thread.cpp
+target_include_directories(core
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
 
 # Private dependencies
 find_package(Threads REQUIRED)
-target_link_libraries(core PRIVATE Threads::Threads)
-
-target_include_directories(core PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+target_link_libraries(core
+    PRIVATE
+        Threads::Threads
 )
 
+set_target_properties(core PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+)
+
+# Installation
+install(TARGETS core
+        EXPORT HeliosTargets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
+
+install(DIRECTORY include/ DESTINATION include)
+
+enable_testing()
 add_subdirectory(tests)

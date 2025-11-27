@@ -1,9 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "core/event_loop.hpp"
-#include "core/h_object.hpp"
+
 #include <chrono>
-#include <iostream>
+#include <gtest/gtest.h>
 #include <thread>
 
 namespace {
@@ -79,5 +77,5 @@ TEST(EventLoopTest, StartAndStopMultipleTimes) {
 
   el.run();
   t.join();
-  el.run(); 
+  el.run();
 }

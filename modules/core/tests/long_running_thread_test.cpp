@@ -1,10 +1,10 @@
+#include "long_running_thread.hpp"
+
 #include <gtest/gtest.h>
 
 #include <chrono>
 #include <future>
 #include <thread>
-
-#include "src/long_running_thread.hpp"
 
 TEST(LongRunningThreadTest, StartAndStop) {
   helios::core::LongRunningThread t;
