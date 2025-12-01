@@ -1,81 +1,76 @@
 #include "core/event_loop.hpp"
 
 #include <chrono>
+#include <future>
 #include <gtest/gtest.h>
 #include <thread>
+
+#include "core/future_result.hpp"
 
 namespace {
 
 class Calculator : public helios::core::HObject {
 public:
-  void add(int first, int second, std::function<void(int)> callback) {
-    post([this, first, second, callback] { callback(first + second); });
+  helios::core::FutureResult<int>::Ptr add(int first, int second) {
+    auto result = std::make_shared<helios::core::FutureResult<int>>();
+    post([this, first, second, result] { result->set(first + second); });
+    return result;
   }
 }; // class Calculator
 
-struct Sig {
-  Sig(int v = 0) : value{v} {}
-  int value{};
-  bool operator==(const Sig &other) const { return value == other.value; }
-}; // struct Sig
-
-inline std::ostream &operator<<(std::ostream &os, const Sig &s) {
-  return os << s.value;
-}
-
-class Listener : public helios::core::HObject {
-public:
-  Listener(std::shared_ptr<helios::core::SignalBus> bus) : HObject{bus} {
-    listen<Sig>(
-        [this](auto value) { post([this, s = *value] { printSig(s); }); });
-  }
-
-private:
-  void printSig(const Sig &s) {}
-
-}; // class Listener
-
-class Publisher : public helios::core::HObject {
-public:
-  Publisher(std::shared_ptr<helios::core::SignalBus> bus) : HObject{bus} {}
-  void startPublish(Sig s) { publish<Sig>(std::move(s)); }
-}; // class Publisher
-
 } // namespace
 
+/**
+ * @brief Tests posting an event to an HObject.
+ *
+ * @details
+ * - Create an HObject and add it to the loop.
+ * - Verify that the event has executed.
+ */
 TEST(EventLoopTest, HandleOneHObject) {
-  helios::core::EventLoop loop;
   auto c = std::make_shared<Calculator>();
-  loop.add(c);
-  loop.run();
-  int actual{};
-  c->add(2, 3, [&actual](auto result) { actual = result; });
-  loop.stop();
-  EXPECT_EQ(actual, 5);
+  helios::core::EventLoop loop{c};
+  auto future = c->add(2, 3);
+  auto result = future->get();
+  EXPECT_EQ(result, 5);
 }
 
-TEST(EventLoopTest, StartAndStopMultipleTimes) {
-  auto sb = std::make_shared<helios::core::SignalBus>();
-  auto pu = std::make_shared<Publisher>(sb);
-  auto li = std::make_shared<Listener>(sb);
-  helios::core::EventLoop el;
-  el.add({pu, li});
-  std::thread t{[&pu] {
-    for (int i{}; i < 10; ++i) {
-      pu->startPublish(i);
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-  }};
+/**
+ * @brief Tests that the destructor waits for the current events.
+ *
+ * @details
+ * - When the destructor of the event loop is called, it should wait for the
+ *   current events to be executed first.
+ * - Verify that the event has executed.
+ */
+TEST(EventLoopTest, WaitsForCurrentEvents) {
+  int result{};
+  {
+    auto c = std::make_shared<Calculator>();
+    helios::core::EventLoop loop{c};
+    c->add(2, 3)->then([&result](auto resultValue) {
+      result = *resultValue;
+    }); // Post event
+    // Delete c (Should wait for the posted event to be executed first)
+  }
+  EXPECT_EQ(result, 5);
+}
 
-  el.run();
-  std::this_thread::sleep_for(std::chrono::milliseconds(2));
-  el.stop();
-
-  el.run();
-  std::this_thread::sleep_for(std::chrono::milliseconds(2));
-  el.stop();
-
-  el.run();
-  t.join();
-  el.run();
+/**
+ * @brief Test adding an HObject to multiple loops.
+ *
+ * @details
+ * - Tests adding an HObject to a loop and then deleting this loop and then
+ *   adding the HObject to a new loop.
+ */
+TEST(EventLoopTest, NewLoop) {
+  auto c = std::make_shared<Calculator>();
+  {
+    helios::core::EventLoop loop{c};
+    auto resultValue = c->add(2, 3)->get();
+    EXPECT_EQ(resultValue, 5);
+  } // Loop is deleted
+  helios::core::EventLoop loop{c}; // Create a new loop
+  auto resultValue = c->add(3, 3)->get();
+  EXPECT_EQ(resultValue, 6);
 }

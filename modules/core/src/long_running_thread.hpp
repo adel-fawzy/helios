@@ -1,112 +1,113 @@
 #pragma once
 
-#include <atomic>
 #include <condition_variable>
 #include <functional>
-#include <future>
 #include <mutex>
 #include <thread>
 
-namespace helios::core {
-
-/**
- * @class core::LongRunningThread
- *
- * @brief Runs a long-running function in a separate thread in a while loop.
- *
- * @details
- * - The function passed by the client will be run in a while loop.
- * - After the function returns, the class will sleep.
- * - The predicate passed by the client will be called to determine when should
- * the thread wake up.
- *
- * @note
- * - All public functions are synchronous.
- * - All public functions are thread-safe.
- */
-class LongRunningThread final {
-public:
-  /**
-   * @brief Default constructor.
-   */
-  LongRunningThread() = default;
+namespace helios::core
+{
 
   /**
-   * @brief Destructor.
-   */
-  ~LongRunningThread();
-
-  /**
-   * @brief Delete copy and move semantics.
-   */
-  LongRunningThread(const LongRunningThread &) = delete;
-  LongRunningThread &operator=(const LongRunningThread &) = delete;
-  LongRunningThread(LongRunningThread &&) = delete;
-  LongRunningThread &operator=(LongRunningThread &&) = delete;
-
-  /**
-   * @brief Starts the thread.
+   * @class core::LongRunningThread
+   *
+   * @brief Runs long running work for the client.
    *
    * @details
-   * - Does not return immediately. Waits for the thread function to be executed
-   *   and then returns.
-   * - Returns silently if called while the thread is already running.
-   *
-   * @param work Function that the thread executes.
-   * @param predicate Should return true when the thread should wake up,
-   *                  otherwise should return false.
+   * - This class allows the client to do some long running work in a separate thread.
+   * - This class takes two functions from the client:
+   *   - Work: This function is called to run work for the client. It should not be long running.
+   *   - Predicate: This function is called to determine whether there is more work to do for the client or not.
+   * - This class calls the client's work function to run work for it in a separate thread.
+   * - After the work function returns, it calls the predicate.
+   * - If the predicate function returns true, then the work function is called again.
+   * - If the predicate function returns false, then the thread sleeps.
+   * - The client can call the notify() function to wake up the thread.
+   * - When the thread is woken up, it calls predicate to determine whether to sleep again or run the work function.
+   * - The work function must not block. It should do the work and then return.
+   * - The class captures exceptions from the work function.
+   * - The predicate function must not throw any exceptions.
+   * 
+   * @note
+   * - All public functions are synchronous.
+   * - All public functions are not thread-safe.
    */
-  void start(std::function<void()> work, std::function<bool()> predicate);
+  class LongRunningThread final
+  {
+  public:
+    /**
+     * @brief Type alias for the client's work function.
+     */
+    using WorkFunc = std::function<void()>;
 
-  /**
-   * @brief Stops the thread.
-   *
-   * @details
-   * - Does not return immediately. Waits for the thread function to return and
-   *   then returns.
-   * - Returns silently if the thread is not running.
-   */
-  void stop();
+    /**
+     * @brief Type alias for the client's predicate function.
+     */
+    using PredicateFunc = std::function<bool()>;
 
-  /**
-   * @brief Wakes the thread if it is sleeping. When the thread is up, it will
-   *        call the client's predicate to determine whether to sleep again or
-   *        enter the while loop.
-   */
-  void notify();
+    /**
+     * @brief Constructor
+     *
+     * @param w The client's work function.
+     * @param p The client's predicate function.
+     *
+     * @details
+     * - Returns after the thread is started.
+     */
+    LongRunningThread(WorkFunc w, PredicateFunc p);
 
-private:
-  /**
-   * @brief Thread manager.
-   */
-  std::thread t_;
+    /**
+     * @brief Destructor.
+     */
+    virtual ~LongRunningThread();
 
-  /**
-   * @brief Set to true to stop the thread. Reset to false once the thread is
-   *        stopped.
-   */
-  std::atomic<bool> stopCommand_{false};
+    /**
+     * @brief Delete copy and move semantics.
+     */
+    LongRunningThread(const LongRunningThread &) = delete;
+    LongRunningThread &operator=(const LongRunningThread &) = delete;
+    LongRunningThread(LongRunningThread &&) = delete;
+    LongRunningThread &operator=(LongRunningThread &&) = delete;
 
-  /**
-   * @brief Used to wake the thread.
-   */
-  std::condition_variable cv_;
+    /**
+     * @brief Wakes the thread.
+     *
+     * @details
+     * - If the thread was sleeping, it will wake up and call the client's predicate to determine whether to sleep again or
+     *   call the work function.
+     */
+    void notify();
 
-  /**
-   * @brief Protects this class.
-   */
-  std::mutex mtx_;
+  private:
+    /**
+     * @brief Client's work function.
+     */
+    WorkFunc w_;
 
-  /**
-   * @brief Function that runs in the thread.
-   *
-   * @param work Function that performs the client's work.
-   * @param predicate Function that returns true if the client has work to do.
-   * @param promise Ref to promise which is set when the thread starts the
-   *                function.
-   */
-  void loop(std::function<void()> work, std::function<bool()> predicate,
-            std::promise<void> promise);
-}; // class LongRunningThread
+    /**
+     * @brief Client's predicate function.
+     */
+    PredicateFunc p_;
+
+    /**
+     * @brief Thread manager.
+     */
+    std::thread t_;
+
+    /**
+     * @brief Used to wake the thread.
+     */
+    std::condition_variable cv_;
+
+    /**
+     * @brief Protects this class.
+     */
+    std::mutex mtx_;
+
+    /**
+     * @brief Set to true to stop the thread.
+     */
+    bool stop_{false};
+  }; // class LongRunningThread
 
 }; // namespace helios::core

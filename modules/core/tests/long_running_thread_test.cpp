@@ -1,55 +1,71 @@
 #include "long_running_thread.hpp"
 
 #include <gtest/gtest.h>
-
+#include <exception>
 #include <chrono>
 #include <future>
 #include <thread>
+#include <memory>
 
-TEST(LongRunningThreadTest, StartAndStop) {
-  helios::core::LongRunningThread t;
-  t.start(
+TEST(LongRunningThreadTest, WorkIsDone)
+{
+  bool isWorkDone{false};
+  std::promise<void> pr;
+  helios::core::LongRunningThread t{
       // WORK
-      [] {
-        std::this_thread::sleep_for(
-            std::chrono::seconds(5)); // Simulate long work
+      [&]
+      {
+        isWorkDone = true;
+        pr.set_value();
       },
       // PREDICATE
-      [] { return false; });
-  t.stop();
+      []
+      {
+        return true;
+      }};
+  pr.get_future().wait();
+  EXPECT_TRUE(isWorkDone);
 }
 
-TEST(LongRunningThreadTest, StartAndDestruct) {
-  helios::core::LongRunningThread t;
-  t.start(
+TEST(LongRunningThreadTest, DestructorStopsThreadImmediately)
+{
+  std::mutex mtx;
+  std::unique_lock<std::mutex> lock(mtx);
+  std::condition_variable cv;
+  bool isObjectDestroyed{false};
+  std::thread t = std::thread([&]
+                              {
+                                auto t = std::make_shared<helios::core::LongRunningThread>(
+                                    // WORK
+                                    [&]
+                                    {
+                                    },
+                                    // PREDICATE
+                                    []
+                                    { return false; });
+                                t.reset(); // ~LongRunningThread is called and should not block for long
+                                std::unique_lock<std::mutex> lock(mtx);
+                                isObjectDestroyed = true;
+                                cv.notify_one();
+                                lock.unlock(); });
+  // Wait for the object to be destroyed for up to 1 sec
+  bool ok = cv.wait_for(lock, std::chrono::seconds(5),
+                        [&]
+                        { return isObjectDestroyed; });
+  // Fail test if timeout happened
+  EXPECT_TRUE(ok);
+  t.join();
+}
+
+TEST(LongRunningThreadTest, WorkThrows)
+{
+  helios::core::LongRunningThread t{
       // WORK
-      [] {
-        std::this_thread::sleep_for(
-            std::chrono::seconds(5)); // Simulate long work
+      []
+      {
+        throw std::runtime_error("Runtime error while doing some work!");
       },
       // PREDICATE
-      [] { return false; });
-}
-
-TEST(LongRunningThreadTest, StopWhileNotRunning) {
-  helios::core::LongRunningThread t;
-  t.stop();
-}
-
-TEST(LongRunningThreadTest, DestructWhileNotRunning) {
-  helios::core::LongRunningThread t;
-}
-
-TEST(LongRunningThreadTest, PredicateWakesThread) {
-  helios::core::LongRunningThread t;
-  std::atomic<bool> predicateResult{false};
-  t.start(
-      // WORK
-      [] {},
-      // PREDICATE
-      [&predicateResult] { return predicateResult.load(); });
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  predicateResult = true;
-  t.notify();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      []
+      { return false; }};
 }
