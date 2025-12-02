@@ -1,4 +1,5 @@
 #include "core/h_object.hpp"
+#include <iostream>
 
 namespace helios::core {
 
@@ -6,6 +7,8 @@ HObject::HObject(std::shared_ptr<SignalBus> signalBus)
     : signalBus_(signalBus), id_(++nextId_) {}
 
 HObject::~HObject() {
+  std::cout << "Destructing hobject" << std::endl;
+
   if (signalBus_)
     signalBus_->unlisten(nextId_);
 }
@@ -36,8 +39,11 @@ void HObject::unsubscribe() {
 
 void HObject::notify() {
   std::lock_guard<std::mutex> lock(mtx_);
-  if (subscriber_)
+  if (subscriber_){
+    std::cout << "hobject::notify: calling subscriber" << std::endl;
     subscriber_();
+    std::cout << "hobject::notify: called subscriber" << std::endl;
+  }
 }
 
 } // namespace helios::core

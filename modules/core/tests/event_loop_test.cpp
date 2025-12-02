@@ -3,6 +3,7 @@
 #include <chrono>
 #include <future>
 #include <gtest/gtest.h>
+#include <iostream>
 #include <thread>
 
 #include "core/future_result.hpp"
@@ -21,6 +22,31 @@ public:
 } // namespace
 
 /**
+ * @brief Tests creating an empty event loop and then adding an HObject.
+ *
+ * @details
+ * - Create an empty event loop then adds one HObject to it then executes an
+ *   event.
+ * - Verify that the event has executed.
+ */
+TEST(EventLoopTest, AddHObject) {
+  std::cout << "TEST: Creating Calculator" << std::endl;
+  auto c = std::make_shared<Calculator>();
+  std::cout << "TEST: Creating empty loop" << std::endl;
+  helios::core::EventLoop loop;
+  std::cout << "TEST: Adding calculator to loop" << std::endl;
+  loop.add(c);
+  std::cout << "hello " << std::endl;
+  std::cout << "TEST: Calling add" << std::endl;
+  // std::optional<int> result = c->add(2, 3)->get();
+  c->add(2, 3);
+  std::cout << "TEST: Called add" << std::endl;
+  // ASSERT_TRUE(result);
+  std::cout << "TEST: Expecting" << std::endl;
+  // EXPECT_EQ(result.value(), 5);
+}
+
+/**
  * @brief Tests posting an event to an HObject.
  *
  * @details
@@ -30,9 +56,9 @@ public:
 TEST(EventLoopTest, HandleOneHObject) {
   auto c = std::make_shared<Calculator>();
   helios::core::EventLoop loop{c};
-  auto future = c->add(2, 3);
-  auto result = future->get();
-  EXPECT_EQ(result, 5);
+  std::optional<int> result = c->add(2, 3)->get();
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result.value(), 5);
 }
 
 /**

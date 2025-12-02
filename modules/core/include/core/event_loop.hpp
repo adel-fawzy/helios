@@ -5,58 +5,69 @@
 
 #include "h_object.hpp"
 
-namespace helios::core
-{
+namespace helios::core {
+
+/**
+ * @class core::EventLoop
+ *
+ * @brief Runs one or more HObjects in a separate thread.
+ *
+ * @details
+ * - During construction, creates a new thread which runs the HObject(s).
+ * - During destruction, waits first for the current events to be executed and
+ * then returns.
+ */
+class EventLoop {
+public:
+  /**
+   * @brief Constructor.
+   */
+  EventLoop();
 
   /**
-   * @class core::EventLoop
+   * @brief Constructor.
    *
-   * @brief Runs one or more HObjects in a separate thread.
-   *
-   * @details
-   * - During construction, creates a new thread which runs the HObject(s).
-   * - During destruction, waits first for the current events to be executed and then returns.
+   * @param obj HObject.
    */
-  class EventLoop
-  {
-  public:
-    /**
-     * @brief Constructor.
-     *
-     * @param obj HObject.
-     */
-    EventLoop(std::shared_ptr<HObject> obj);
+  EventLoop(std::shared_ptr<HObject> obj);
 
-    /**
-     * @brief Constructor
-     *
-     * @param HObjects.
-     */
-    EventLoop(std::initializer_list<std::shared_ptr<HObject>> objs);
+  /**
+   * @brief Constructor
+   *
+   * @param HObjects.
+   */
+  EventLoop(std::initializer_list<std::shared_ptr<HObject>> objs);
 
-    /**
-     * @brief Destructor.
-     */
-    ~EventLoop();
+  /**
+   * @brief Destructor.
+   */
+  ~EventLoop();
 
-    /**
-     * @brief Delete copy and move semantics.
-     */
-    EventLoop(const EventLoop &) = delete;
-    EventLoop &operator=(const EventLoop &) = delete;
-    EventLoop(EventLoop &&) = delete;
-    EventLoop &operator=(EventLoop &&) = delete;
+  /**
+   * @brief Delete copy and move semantics.
+   */
+  EventLoop(const EventLoop &) = delete;
+  EventLoop &operator=(const EventLoop &) = delete;
+  EventLoop(EventLoop &&) = delete;
+  EventLoop &operator=(EventLoop &&) = delete;
 
-  private:
-    /**
-     * @brief Forward declaration for the implementation class.
-     */
-    class Impl;
+  /**
+   * @brief Adds an HObject to the event loop.
+   * 
+   * @param obj The HObject to be added.
+   */
+  void add(std::shared_ptr<HObject> obj);
 
-    /**
-     * @brief Unique pointer to the implementation class.
-     */
-    std::unique_ptr<Impl> impl_;
-  }; // class EventLoop
+private:
+  /**
+   * @brief Forward declaration for the implementation class.
+   */
+  class Impl;
+
+  /**
+   * @brief Unique pointer to the implementation class.
+   */
+  std::unique_ptr<Impl> impl_;
+}; // class EventLoop
 
 } // namespace helios::core

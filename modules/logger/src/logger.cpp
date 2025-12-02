@@ -1,10 +1,11 @@
 #include "logger/logger.hpp"
 
 #include <core/event_loop.hpp>
+#include <vector>
 
-#include "log_message.hpp"
 #include "file_sink.hpp"
 #include "log_config.hpp"
+#include "log_message.hpp"
 #include "standard_output_sink.hpp"
 
 namespace helios::logger {
@@ -30,7 +31,7 @@ private:
   /**
    * @brief Runs the sinks.
    */
-  static core::EventLoop loop_;
+  static std::unique_ptr<core::EventLoop> loop_;
 
   /**
    * @brief Signal bus that holds the signals for logging.
@@ -38,14 +39,9 @@ private:
   static std::shared_ptr<core::SignalBus> logBus_;
 
   /**
-   * @brief Unique pointer to the standard output sink.
+   * @brief Vector of shared pointers to sinks.
    */
-  static std::shared_ptr<StandardOutputSink> stdOutSink_;
-
-  /**
-   * @brief Unique pointer to the file sink.
-   */
-  static std::shared_ptr<FileSink> fileSink_;
+  static std::vector<std::shared_ptr<core::HObject>> sinks_;
 
   /**
    * @brief Indicates if the log sinks are created or not yet.
@@ -71,13 +67,12 @@ LogMessageFactory Logger::error() { return impl_->make(LogLevel::Error); }
 Logger::Impl::Impl(std::string name) : name_{name} {}
 
 std::shared_ptr<core::SignalBus> Logger::Impl::logBus_{
-    std::make_shared<core::SignalBus>()};
+    std::make_shared<core::SignalBus>()
+};
 
-core::EventLoop Logger::Impl::loop_{};
+std::unique_ptr<core::EventLoop> Logger::Impl::loop_{};
 
-std::shared_ptr<StandardOutputSink> Logger::Impl::stdOutSink_;
-
-std::shared_ptr<FileSink> Logger::Impl::fileSink_;
+std::vector<std::shared_ptr<core::HObject>> Logger::Impl::sinks_;
 
 std::once_flag Logger::Impl::isSinksInitialized_;
 
@@ -90,23 +85,15 @@ LogMessageFactory Logger::Impl::make(LogLevel lvl) {
 
 void Logger::Impl::initSinks() {
   if constexpr (ENABLE_STDOUT_SINK) {
-    stdOutSink_ = std::make_unique<StandardOutputSink>(logBus_);
+    sinks_.emplace_back(std::make_shared<StandardOutputSink>(logBus_));
   }
 
   if constexpr (ENABLE_FILE_SINK) {
-    fileSink_ = std::make_unique<FileSink>(logBus_, LOG_FILE_PATH);
+    sinks_.emplace_back(std::make_shared<FileSink>(logBus_));
   }
 
-  if (stdOutSink_) {
-    loop_.add(stdOutSink_);
-  }
-
-  if (fileSink_) {
-    loop_.add(fileSink_);
-  }
-
-  if (stdOutSink_ || fileSink_)
-    loop_.run();
+  for (const auto &sink : sinks_)
+    loop_->add(sink);
 }
 
 } // namespace helios::logger

@@ -79,7 +79,7 @@ protected:
   void subscribe(std::function<void()> cb);
 
   /**
-   * @brief Unubscribes.
+   * @brief Unsubscribes.
    */
   void unsubscribe();
 
