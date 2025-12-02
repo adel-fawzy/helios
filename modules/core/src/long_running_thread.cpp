@@ -12,9 +12,9 @@ LongRunningThread::LongRunningThread(WorkFunc w, PredicateFunc p)
     std::unique_lock<std::mutex> lock(mtx_);
     while (true) {
       cv_.wait(lock, [this] {
-        std::cout << "before p()" << std::endl;
+        std::cout << "LRT: Thread woke up to check client's predicate" << std::endl;
         auto result_1 = p_();
-        std::cout << "after p()" << std::endl;
+        std::cout << "Check client's predicate: " << result_1 << " and stop: " << stop_ << std::endl;
         return result_1 || stop_;
       }); // Sleep until there is work to do or to stop
       if (stop_) {
@@ -40,19 +40,19 @@ LongRunningThread::LongRunningThread(WorkFunc w, PredicateFunc p)
 }
 
 LongRunningThread::~LongRunningThread() {
-  std::cout << "Destructing lrt" << std::endl;
+  std::cout << "LRT: Destructing lrt" << std::endl;
   {
     std::lock_guard<std::mutex> lock(mtx_);
     stop_ = true; // Indicate that the thread should be stopped
   }
   notify();  // Wake the thread in case it is sleeping
   t_.join(); // Wait for the thread to exit
-  std::cout << "Destructed long running thread" << std::endl;
+  std::cout << "LRT: Destructed long running thread" << std::endl;
 }
 
 void LongRunningThread::notify() {
-  std::cout << "notify(): before" << std::endl;
+  std::cout << "LRT::notify(): waking up thread" << std::endl;
   cv_.notify_one();
-  std::cout << "notify(): after" << std::endl;
+  std::cout << "LRT::notify(): Woke up thread" << std::endl;
 }
 }; // namespace helios::core
