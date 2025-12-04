@@ -3,15 +3,16 @@
 namespace helios::core {
 
 bool EventQueue::tryPopAndExecute() {
-  std::function<void()> f;
+  std::function<void()> e;
   {
     std::lock_guard<std::mutex> lock(mtx_);
     if (queue_.empty())
+      // No events to handle
       return false;
-    f = std::move(queue_.front());
+    e = queue_.front();
     queue_.pop();
   }
-  f();
+  e(); // Handle event
   return true;
 }
 

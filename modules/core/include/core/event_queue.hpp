@@ -1,7 +1,5 @@
 #pragma once
 
-#include <condition_variable>
-#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -41,20 +39,18 @@ public:
   /**
    * @brief Adds an event to the queue.
    *
-   * @tparam E Type of Event to add.
+   * @tparam EventT Type of Event to be added.
    * @param event Event to be added.
    */
-  template <typename E> void post(E &&event) {
+  template <typename EventT> void post(EventT &&event) {
     std::lock_guard<std::mutex> lock(mtx_);
-    queue_.push(std::forward<E>(event));
-    cv_.notify_one();
+    q_.push(std::forward<EventT>(event));
   }
 
   /**
    * @brief Handles the first event in the queue and then returns.
    *
-   * @note
-   * - Will silently return if the queue is empty.
+   * @return True if an event is handled, false otherwise.
    */
   bool tryPopAndExecute();
 
@@ -63,24 +59,18 @@ public:
    *
    * @return Returns true if the queue is empty, false otherwise.
    */
-  bool empty();
+  bool empty() const;
 
 private:
   /**
    * @brief Holds events to be handled later.
    */
-  std::queue<Event> queue_;
+  std::queue<Event> q_;
 
   /**
-   * @brief Mutex to protect this class.
+   * @brief Protects this class.
    */
   std::mutex mtx_;
-
-  /**
-   * @brief Condition variable to signal when an event is available in the
-   *        queue.
-   */
-  std::condition_variable cv_;
 }; // class EventQueue
 
 } // namespace helios::core

@@ -5,7 +5,7 @@
 namespace helios::core {
 
 /**
- * @brief Type alias for event.
+ * @brief Type alias for an event handler function.
  */
 using Event = std::function<void()>;
 

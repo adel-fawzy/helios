@@ -17,6 +17,7 @@ public:
     post([this, first, second, result] { result->set(first + second); });
     return result;
   }
+  
 }; // class Calculator
 
 } // namespace

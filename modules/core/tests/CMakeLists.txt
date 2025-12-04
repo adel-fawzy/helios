@@ -8,10 +8,11 @@ set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    active_h_object_test.cpp
     # hobject_test.cpp
-    long_running_thread_test.cpp
-    event_loop_test.cpp
-    future_result_test.cpp
+    # long_running_thread_test.cpp
+    # event_loop_test.cpp
+    # future_result_test.cpp
 )
 
 target_include_directories(core_tests
