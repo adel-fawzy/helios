@@ -2,7 +2,7 @@
 
 #include <future>
 #include <gtest/gtest.h>
-#include <iostream>
+#include <thread>
 
 #include "core/future_result.hpp"
 
@@ -20,41 +20,15 @@ public:
 class Order : public helios::core::ActiveHObject {
 public:
   void postInOrder(std::vector<int> &v) {
-    {
-      std::promise<void> pr;
-      std::future<void> fut = pr.get_future();
-      post([&] {
-        v.push_back(1);
-        pr.set_value();
-      });
-      fut.get();
-    }
-    {
-      std::promise<void> pr;
-      std::future<void> fut = pr.get_future();
-      post([&] {
-        v.push_back(2);
-        pr.set_value();
-      });
-      fut.get();
-    }
-    {
-      std::promise<void> pr;
-      std::future<void> fut = pr.get_future();
-      post([&] {
-        v.push_back(3);
-        pr.set_value();
-      });
-      fut.get();
-    }
+    for (int i{0}; i < 10; ++i)
+      post([i, &v] { v.push_back(i); });
   }
-}; // class Thrower
+}; // class Order
 
 class Thrower : public helios::core::ActiveHObject {
 public:
   void throwException() {
     post([] {
-      std::cout << "Event called" << std::endl;
       throw std::runtime_error("Testing that the HObject catches exceptions");
     });
   }
@@ -84,7 +58,6 @@ TEST(ActiveHObjectTest, PostedEventRuns) {
  */
 TEST(ActiveHObjectTest, HObjectCatchesExceptions) {
   Thrower t;
-  std::cout << "TEST: Calling" << std::endl;
   t.throwException();
 }
 
@@ -95,7 +68,9 @@ TEST(ActiveHObjectTest, ExecutesEventsInOrder) {
   Order obj;
   std::vector<int> result;
   obj.postInOrder(result);
-  EXPECT_EQ(result[0], 1);
-  EXPECT_EQ(result[1], 2);
-  EXPECT_EQ(result[2], 3);
+  while (result.size() != 10) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+  for (int i{0}; i < 10; ++i)
+    EXPECT_EQ(result[i], i);
 }

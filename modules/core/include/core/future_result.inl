@@ -5,8 +5,7 @@
 
 namespace helios::core {
 
-template <typename ResultType>
-class FutureResult<ResultType>::Impl {
+template <typename ResultType> class FutureResult<ResultType>::Impl {
 public:
   /**
    * @brief Value of the result.
@@ -53,8 +52,7 @@ void FutureResult<ResultType>::setImpl(std::shared_ptr<void> value) {
 
 template <typename ResultType>
 void FutureResult<ResultType>::then(
-    std::function<void(std::shared_ptr<ResultType>)> cb
-) {
+    std::function<void(std::shared_ptr<ResultType>)> cb) {
   {
     std::lock_guard<std::mutex> lock(impl_->mtx_);
 
@@ -73,9 +71,8 @@ FutureResult<ResultType>::getPtr(std::chrono::milliseconds timeout) {
   if (timeout == std::chrono::milliseconds::max()) {
     impl_->cv_.wait(lock, [this] { return impl_->result_ != nullptr; });
   } else {
-    impl_->cv_.wait_for(lock, timeout, [this] {
-      return impl_->result_ != nullptr;
-    });
+    impl_->cv_.wait_for(lock, timeout,
+                        [this] { return impl_->result_ != nullptr; });
   }
   return std::static_pointer_cast<ResultType>(impl_->result_);
 }
@@ -89,9 +86,8 @@ FutureResult<ResultType>::get(std::chrono::milliseconds timeout) {
     impl_->cv_.wait(lock, [this] { return impl_->result_ != nullptr; });
     res = *std::static_pointer_cast<ResultType>(impl_->result_);
   } else {
-    impl_->cv_.wait_for(lock, timeout, [this] {
-      return impl_->result_ != nullptr;
-    });
+    impl_->cv_.wait_for(lock, timeout,
+                        [this] { return impl_->result_ != nullptr; });
   }
   return res;
 }

@@ -1,15 +1,31 @@
 #pragma once
 
-#include <memory>
+#include <condition_variable>
+#include <deque>
+#include <thread>
 
+#include "event.hpp"
 #include "h_object.hpp"
+#include "future_result.hpp"
 
 namespace helios::core {
 
 /**
  * @class core::ActiveHObject
  *
- * @brief Adds active event execution to HObject.
+ * @brief Adds active asynchronous capability to HObject.
+ *
+ * @details
+ * - Provides the derived classes with asynchronous event handling using the
+ *   post() function.
+ * - During construction, the thread which runs the event queue is created.
+ * - During destruction, all events in the queue are executed first and then the
+ *   object is destroyed.
+ *
+ * @note
+ * - All public functions are asynchronous except the post() function which must
+ *   be synchronous since it is communicating with the event queue.
+ * - All public functions are thread-safe.
  */
 class ActiveHObject : public HObject {
 public:
@@ -17,11 +33,17 @@ public:
    * @brief Constructor.
    *
    * @param signalBus Optional shared pointer to the signal bus.
+   *
+   * @note
+   * - Blocks until the event is started and then returns.
    */
   ActiveHObject(std::shared_ptr<SignalBus> signalBus = nullptr);
 
   /**
-   * @brief Default destructor.
+   * @brief Destructor.
+   *
+   * @note
+   * - Blocks until all events in the queue are handled.
    */
   ~ActiveHObject() override;
 
@@ -33,24 +55,53 @@ public:
   ActiveHObject(ActiveHObject &&) = delete;
   ActiveHObject &operator=(ActiveHObject &&) = delete;
 
-protected:
-  void onEventPosted() override;
+  /**
+   * @brief Posts an event to the queue.
+   *
+   * @tparam EventT Type of event to be posted.
+   * @param e Event to be posted.
+   */
+  template <typename EventT> void post(EventT &&e) {
+    postImpl(std::forward<EventT>(e));
+  }
 
 private:
   /**
-   * @brief Handles event execution.
+   * @brief Loop thread that runs the event queue.
    */
   std::thread t_;
 
   /**
    * @brief Set to true to stop the thread.
    */
-  bool stopRunning_{false};
+  bool stopLoop_{false};
 
   /**
-   * @brief Runs the queue until the object is destroyed.
+   * @brief Synchronizes between the loop thread and other threads.
+   */
+  std::condition_variable cv_;
+
+  /**
+   * @brief Protects this class.
+   */
+  std::mutex mtx_;
+
+  /**
+   * @brief Event queue.
+   */
+  std::deque<Event> q_;
+
+  /**
+   * @brief Function that runs in the loop thread.
    */
   void run();
+
+  /**
+   * @brief Posts an event to the queue.
+   *
+   * @param e Event to be posted.
+   */
+  void postImpl(Event e);
 }; // class ActiveHObject
 
 }; // namespace helios::core

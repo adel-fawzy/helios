@@ -1,31 +1,22 @@
 #include "core/in_active_h_object.hpp"
 
+#include <future>
+
 namespace helios::core {
 
-InActiveHObject::InActiveHObject(std::shared_ptr<SignalBus> signalBus)
-    : HObject(std::move(signalBus)) {}
+InActiveHObject::InActiveHObject(std::shared_ptr<HLoop> loop,
+                                 std::shared_ptr<SignalBus> bus)
+    : HObject(std::move(bus)), loop_(loop) {}
 
-InActiveHObject::~InActiveHObject() { shutdown(); }
-
-bool InActiveHObject::tryPopAndExecute() {
-  // std::optional<Event> e = HObject::pop();
-  // if (!e)
-  //   return false;
-  // handle(*e);
-  // return true;
+InActiveHObject::~InActiveHObject() {
+  // Post a stop event
+  std::promise<void> finished;
+  loop_->post([this, &finished] {
+    finished.set_value(); // Indicate that the event has executed
+  });
+  finished.get_future().get(); // Wait for the stop event to be executed
 }
 
-void InActiveHObject::onEventPosted() {
-  if (cb_)
-    cb_(); // Notify subscriber that an event is posted
-}
-
-void InActiveHObject::subscribe(std::function<void()> cb) {
-  post([this, cb = std::move(cb)] { cb_ = cb; });
-}
-
-void InActiveHObject::unsubscribe() {
-  post([this] { cb_ = nullptr; });
-}
+void InActiveHObject::postImpl(Event e) { loop_->post(std::move(e)); }
 
 } // namespace helios::core

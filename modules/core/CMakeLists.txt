@@ -2,11 +2,8 @@ add_library(core SHARED)
 
 target_sources(core
     PRIVATE
-        # src/event_loop.cpp
-        # src/event_queue.cpp
         src/signal_bus.cpp
         src/in_active_h_object.cpp
-        # src/long_running_thread.cpp
         src/active_h_object.cpp
 )
 

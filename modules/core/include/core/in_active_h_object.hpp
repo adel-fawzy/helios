@@ -1,5 +1,8 @@
 #pragma once
 
+#include "event.hpp"
+#include "future_result.hpp"
+#include "h_loop.hpp"
 #include "h_object.hpp"
 
 namespace helios::core {
@@ -7,16 +10,24 @@ namespace helios::core {
 /**
  * @class core::InActiveHObject
  *
- * @brief Adds passive event execution to HObject.
+ * @brief Adds passive asynchronous capability to HObject.
+ *
+ * @details
+ * - Adds asynchronous capability but needs core::HLoop to run it.
+ *
+ * @note
+ * - post() is thread-safe.
  */
 class InActiveHObject : public HObject {
 public:
   /**
    * @brief Constructor.
    *
-   * @param signalBus Optional shared pointer to the signal bus.
+   * @param loop Shared pointer to HLoop that will execute the events.
+   * @param bus Optional shared pointer to the signal bus.
    */
-  InActiveHObject(std::shared_ptr<SignalBus> signalBus);
+  InActiveHObject(std::shared_ptr<HLoop> loop,
+                  std::shared_ptr<SignalBus> bus = nullptr);
 
   /**
    * @brief Default destructor.
@@ -32,35 +43,28 @@ public:
   InActiveHObject &operator=(InActiveHObject &&) = delete;
 
 protected:
-  void onEventPosted() override;
+  /**
+   * @brief Posts an event to the queue.
+   *
+   * @tparam EventT Type of event to be posted.
+   * @param e Event to be posted.
+   */
+  template <typename EventT> void post(EventT &&e) {
+    postImpl(std::forward<EventT>(e));
+  }
 
 private:
   /**
-   * @brief Subscriber's callback.
+   * @brief Shared pointer to the event loop.
    */
-  std::function<void()> cb_;
+  std::shared_ptr<HLoop> loop_;
 
   /**
-   * @brief Handles the first event in the queue and then returns.
+   * @brief Posts an event to the queue.
    *
-   * @return True if an event is handled, false otherwise.
+   * @param e Event to be posted.
    */
-  bool tryPopAndExecute();
+  void postImpl(Event e);
+};
 
-  /**
-   * @brief Subscribes to be notified when an event is posted.
-   */
-  void subscribe(std::function<void()> cb);
-
-  /**
-   * @brief Unsubscribes.
-   */
-  void unsubscribe();
-
-  /**
-   * @brief EventLoop needs friend access to run the InActiveHObject.
-   */
-  friend class EventLoop;
-}; // class InActiveHObject
-
-}; // namespace helios::core
+} // namespace helios::core
