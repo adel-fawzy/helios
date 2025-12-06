@@ -33,5 +33,11 @@ install(TARGETS core
 
 install(DIRECTORY include/ DESTINATION include)
 
+# Export the package for find_package
+install(EXPORT HeliosTargets
+        FILE HeliosConfig.cmake
+        NAMESPACE Helios::
+        DESTINATION lib/cmake/Helios)
+
 enable_testing()
 add_subdirectory(tests)
