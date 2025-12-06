@@ -24,10 +24,10 @@ public:
    * @brief Constructor.
    *
    * @param loop Shared pointer to HLoop that will execute the events.
-   * @param bus Optional shared pointer to the signal bus.
+   * @param hBus Optional shared pointer to the signal bus.
    */
   InActiveHObject(std::shared_ptr<HLoop> loop,
-                  std::shared_ptr<SignalBus> bus = nullptr);
+                  std::shared_ptr<HBus> hBus = nullptr);
 
   /**
    * @brief Default destructor.

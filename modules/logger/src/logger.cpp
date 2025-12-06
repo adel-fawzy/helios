@@ -36,7 +36,7 @@ private:
   /**
    * @brief Signal bus that holds the signals for logging.
    */
-  static std::shared_ptr<core::SignalBus> logBus_;
+  static std::shared_ptr<core::HBus> logBus_;
 
   /**
    * @brief Vector of shared pointers to sinks.
@@ -66,9 +66,8 @@ LogMessageFactory Logger::error() { return impl_->make(LogLevel::Error); }
 
 Logger::Impl::Impl(std::string name) : name_{name} {}
 
-std::shared_ptr<core::SignalBus> Logger::Impl::logBus_{
-    std::make_shared<core::SignalBus>()
-};
+std::shared_ptr<core::HBus> Logger::Impl::logBus_{
+    std::make_shared<core::HBus>()};
 
 std::unique_ptr<core::EventLoop> Logger::Impl::loop_{};
 

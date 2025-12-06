@@ -8,6 +8,7 @@ set(INSTALL_GTEST OFF)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(core_tests
+    h_object_test.cpp
     active_h_object_test.cpp
     in_active_h_object_test.cpp
     future_result_test.cpp

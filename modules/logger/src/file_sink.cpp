@@ -19,9 +19,9 @@ void write(const std::string &s, std::ofstream &file) {
 
 namespace helios::logger {
 
-FileSink::FileSink(std::shared_ptr<core::SignalBus> signalBus,
+FileSink::FileSink(std::shared_ptr<core::HBus> hBus,
                    const std::string &filePath)
-    : HObject{signalBus}, file_{filePath} {
+    : HObject{hBus}, file_{filePath} {
   listen<LogMessage>([this](auto logMessage) {
     auto e = [this, msg = logMessage->msg] { write(msg, file_); };
     post(e);

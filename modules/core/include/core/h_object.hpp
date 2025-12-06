@@ -3,18 +3,22 @@
 #include <atomic>
 #include <memory>
 
-#include "signal_bus.hpp"
+#include "h_bus.hpp"
 
 namespace helios::core {
+
+#define LISTEN(Type, Callback) listen<Type>(Callback)
+
+#define PUBLISH(Value) publish(Value)
 
 /**
  * @class core::HObject
  *
- * @brief Provides access to the SignalBus through a unique ID.
+ * @brief Provides access to the HBus through a unique ID.
  *
  * @details
- * - Each HObject has a unique ID. This ID is used to listen on the SignalBus.
- * - Unsubscribes from the SignalBus through its unique ID during destruction.
+ * - Each HObject has a unique ID. This ID is used to listen on the HBus.
+ * - Unsubscribes from the HBus through its unique ID during destruction.
  */
 class HObject {
 public:
@@ -23,14 +27,14 @@ public:
    *
    * @param bus Shared pointer to the signal bus.
    */
-  HObject(std::shared_ptr<SignalBus> bus) : bus_(bus), id_(++nextId_) {}
+  HObject(std::shared_ptr<HBus> hBus) : hBus_(hBus), id_(++nextId_) {}
 
   /**
    * @brief Virtual destructor.
    */
   virtual ~HObject() {
-    if (bus_)
-      bus_->unlisten(id_);
+    if (hBus_)
+      hBus_->unlisten(id_);
   }
 
   /**
@@ -50,10 +54,8 @@ protected:
    * @param cb The callback function to invoke when the signal is published.
    */
   template <typename SignalT, typename CallbackT> void listen(CallbackT &&cb) {
-    post([this, cb = std::forward<CallbackT>(cb)] {
-      if (bus_)
-        bus_->listen<SignalT>(id_, std::move(cb));
-    });
+    if (hBus_)
+      hBus_->listen<SignalT>(id_, std::forward<CallbackT>(cb));
   }
 
   /**
@@ -63,10 +65,8 @@ protected:
    * @param s The signal to publish.
    */
   template <typename SignalT> void publish(SignalT &&s) {
-    post([this, s = std::forward<SignalT>(s)] {
-      if (bus_)
-        bus_->publish<SignalT>(std::move(s));
-    });
+    if (hBus_)
+      hBus_->publish<SignalT>(std::forward<SignalT>(s));
   }
 
 private:
@@ -83,7 +83,7 @@ private:
   /**
    * @brief Shared pointer to the signal bus.
    */
-  std::shared_ptr<SignalBus> bus_;
+  std::shared_ptr<HBus> hBus_;
 }; // class HObject
 
 } // namespace helios::core

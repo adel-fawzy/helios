@@ -4,8 +4,8 @@
 
 namespace helios::core {
 
-ActiveHObject::ActiveHObject(std::shared_ptr<SignalBus> signalBus)
-    : HObject(std::move(signalBus)) {
+ActiveHObject::ActiveHObject(std::shared_ptr<HBus> hBus)
+    : HObject(std::move(hBus)) {
   std::promise<void> started;
   auto main = [this, &started] {
     started.set_value(); // Indicate that the loop thread started

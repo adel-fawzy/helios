@@ -4,6 +4,54 @@
 #include <gtest/gtest.h>
 #include <thread>
 
+#include "core/active_h_object.hpp"
+
+namespace {
+
+class Calculator : helios::core::ActiveHObject {
+public:
+  helios::core::FutureResult<int>::Ptr add(int first, int second) {
+    auto handleAdd = [first, second](auto fut) { fut->set(first + second); };
+    return FUTURE_POST_CALLABLE(int, handleAdd);
+  };
+}; // class Calculator
+
+class Client : public helios::core::ActiveHObject {
+public:
+  Client(std::shared_ptr<Calculator> calculator) : calculator_(calculator) {}
+  std::future<int> start_1(int first, int second) {
+    calculator_->add(first, second) THEN_POST({ pr_.set_value(*result); });
+    return pr_.get_future();
+  }
+  std::future<int> start_2(int first, int second) {
+    auto pr = std::make_shared<std::promise<int>>();
+    std::future<int> fut = pr->get_future();
+    auto cb = [this, pr](std::shared_ptr<int> result) mutable {
+      pr->set_value(*result);
+    };
+    calculator_->add(first, second) THEN_POST_CALLABLE(cb);
+    return fut;
+  }
+
+private:
+  std::promise<int> pr_;
+  std::shared_ptr<Calculator> calculator_;
+}; // class Client
+
+}; // namespace
+
+/**
+ * @brief Use macros to pass a callback.
+ */
+TEST(FutureResultTest, Macros) {
+  auto c = std::make_shared<Calculator>();
+  Client client(c);
+  std::future<int> fut_1 = client.start_1(5, 4);
+  EXPECT_EQ(fut_1.get(), 9);
+  std::future<int> fut_2 = client.start_2(4, 9);
+  EXPECT_EQ(fut_2.get(), 13);
+}
+
 /**
  * @brief Client takes the result from its callback.
  *
@@ -14,9 +62,8 @@
 TEST(FutureResultTest, Callback) {
   helios::core::FutureResult<int> result;
   int resultValue{};
-  result.then([&resultValue](std::shared_ptr<int> value) {
-    resultValue = *value;
-  });
+  result.then(
+      [&resultValue](std::shared_ptr<int> value) { resultValue = *value; });
   const int expected{5};
   std::thread t{[&result, expected] { result.set(expected); }};
   t.join();

@@ -19,9 +19,8 @@ void write(const std::string &s) {
 
 namespace helios::logger {
 
-StandardOutputSink::StandardOutputSink(
-    std::shared_ptr<core::SignalBus> signalBus)
-    : HObject(signalBus) {
+StandardOutputSink::StandardOutputSink(std::shared_ptr<core::HBus> hBus)
+    : HObject(hBus) {
   listen<LogMessage>([this](auto logMessage) {
     auto e = [this, msg = logMessage->msg] { write(msg); };
     post(e);

@@ -19,11 +19,10 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param signalBus Bus used for log messages.
+   * @param hBus Bus used for log messages.
    * @param filePath Path of the file used for logging.
    */
-  FileSink(std::shared_ptr<core::SignalBus> signalBus,
-           const std::string &filePath);
+  FileSink(std::shared_ptr<core::HBus> hBus, const std::string &filePath);
 
   /**
    * @brief Default virtual destructor.

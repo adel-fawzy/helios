@@ -5,10 +5,24 @@
 #include <thread>
 
 #include "event.hpp"
-#include "h_object.hpp"
 #include "future_result.hpp"
+#include "h_object.hpp"
 
 namespace helios::core {
+
+#define FUTURE_POST(retType, body)                                             \
+  [&]() -> helios::core::FutureResult<retType>::Ptr {                          \
+    auto fut = std::make_shared<helios::core::FutureResult<retType>>();        \
+    post([=]() mutable body);                                                  \
+    return fut;                                                                \
+  }()
+
+#define FUTURE_POST_CALLABLE(retType, fn)                                      \
+  [&]() -> helios::core::FutureResult<retType>::Ptr {                          \
+    auto fut = std::make_shared<helios::core::FutureResult<retType>>();        \
+    post([=, fn = fn]() mutable { fn(fut); });                                 \
+    return fut;                                                                \
+  }()
 
 /**
  * @class core::ActiveHObject
@@ -32,12 +46,12 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param signalBus Optional shared pointer to the signal bus.
+   * @param hBus Optional shared pointer to the signal bus.
    *
    * @note
    * - Blocks until the event is started and then returns.
    */
-  ActiveHObject(std::shared_ptr<SignalBus> signalBus = nullptr);
+  ActiveHObject(std::shared_ptr<HBus> hBus = nullptr);
 
   /**
    * @brief Destructor.
@@ -55,6 +69,7 @@ public:
   ActiveHObject(ActiveHObject &&) = delete;
   ActiveHObject &operator=(ActiveHObject &&) = delete;
 
+protected:
   /**
    * @brief Posts an event to the queue.
    *

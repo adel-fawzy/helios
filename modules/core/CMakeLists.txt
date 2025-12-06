@@ -2,7 +2,7 @@ add_library(core SHARED)
 
 target_sources(core
     PRIVATE
-        src/signal_bus.cpp
+        src/h_bus.cpp
         src/in_active_h_object.cpp
         src/active_h_object.cpp
 )

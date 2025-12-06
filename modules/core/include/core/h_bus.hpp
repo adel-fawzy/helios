@@ -9,7 +9,7 @@
 namespace helios::core {
 
 /**
- * @class core::SignalBus
+ * @class core::HBus
  *
  * @brief Used for communication between event-driven objects.
  *
@@ -22,56 +22,56 @@ namespace helios::core {
  * - All public functions are thread-safe.
  * - All public functions are synchronous.
  */
-class SignalBus {
+class HBus {
 public:
   /**
-   * @brief Default constructor.
+   * @brief Constructor.
    */
-  SignalBus();
+  HBus();
 
   /**
    * @brief Destructor.
    */
-  ~SignalBus();
+  ~HBus();
 
   /**
    * @brief Delete copy and move semantics.
    */
-  SignalBus(const SignalBus &) = delete;
-  SignalBus &operator=(const SignalBus &) = delete;
-  SignalBus(SignalBus &&) = delete;
-  SignalBus &operator=(SignalBus &&) = delete;
+  HBus(const HBus &) = delete;
+  HBus &operator=(const HBus &) = delete;
+  HBus(HBus &&) = delete;
+  HBus &operator=(HBus &&) = delete;
 
   /**
    * @brief Listens to a signal.
    *
-   * @tparam SignalType Type of the signal to listen to.
+   * @tparam SignalT Type of the signal to listen to.
    * @param id ID of the HObject that wants to listener.
    * @param listenerCallback Callback that will be called when the signal is
    *        published on the bus.
    */
-  template <typename SignalType>
-  void listen(
-      ID id,
-      std::function<void(std::shared_ptr<const SignalType>)> listenerCallback) {
+  template <typename SignalT>
+  void
+  listen(ID id,
+         std::function<void(std::shared_ptr<const SignalT>)> listenerCallback) {
     // Wrap user callback
     auto wrapper =
         [cb = std::move(listenerCallback)](std::shared_ptr<const void> s) {
-          cb(std::static_pointer_cast<const SignalType>(s));
+          cb(std::static_pointer_cast<const SignalT>(s));
         };
 
-    listenImpl(typeid(SignalType), id, std::move(wrapper));
+    listenImpl(typeid(SignalT), id, std::move(wrapper));
   }
 
   /**
    * @brief Publishes a signal on the bus.
    *
-   * @tparam SignalType Type of the published signal.
+   * @tparam SignalT Type of the published signal.
    * @param s The published signal.
    */
-  template <typename SignalType> void publish(SignalType &&s) {
-    using T = std::remove_cv_t<std::remove_reference_t<SignalType>>;
-    publishImpl(typeid(T), std::make_shared<T>(std::forward<SignalType>(s)));
+  template <typename SignalT> void publish(SignalT &&s) {
+    using T = std::remove_cv_t<std::remove_reference_t<SignalT>>;
+    publishImpl(typeid(T), std::make_shared<T>(std::forward<SignalT>(s)));
   }
 
   /**
@@ -98,6 +98,6 @@ private:
 
   void publishImpl(std::type_index signalType,
                    std::shared_ptr<const void> signal);
-}; // class SignalBus
+}; // class HBus
 
 } // namespace helios::core

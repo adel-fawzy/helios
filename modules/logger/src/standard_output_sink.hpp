@@ -18,9 +18,9 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param signalBus Bus used for log messages.
+   * @param hBus Bus used for log messages.
    */
-  StandardOutputSink(std::shared_ptr<core::SignalBus> signalBus);
+  StandardOutputSink(std::shared_ptr<core::HBus> hBus);
 
   /**
    * @brief Default virtual destructor.

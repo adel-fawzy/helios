@@ -7,6 +7,18 @@
 
 namespace helios::core {
 
+#define THEN_POST(block)                                                       \
+  ->then([this](auto &&__value) {                                              \
+    this->post(                                                                \
+        [result = std::forward<decltype(__value)>(__value), this] { block });  \
+  })
+
+#define THEN_POST_CALLABLE(fn)                                                 \
+  ->then([this, fn = fn](auto &&__value) {                                     \
+    this->post([result = std::forward<decltype(__value)>(__value),             \
+                fn]() mutable { fn(result); });                                \
+  })
+
 /**
  * @class core::FutureResult
  *
@@ -19,8 +31,7 @@ namespace helios::core {
  * - All public functions are synchronous.
  * - All public functions are thread-safe.
  */
-template <typename ResultType>
-class FutureResult final {
+template <typename ResultType> class FutureResult final {
 public:
   /**
    * @brief Type alias for shared pointer to FutureResult<T>
@@ -42,8 +53,7 @@ public:
    *
    * @tparam value Value of the result.
    */
-  template <typename T>
-  void set(T &&value) {
+  template <typename T> void set(T &&value) {
     auto r = std::make_shared<ResultType>(std::forward<T>(value));
     setImpl(std::move(r));
   }
