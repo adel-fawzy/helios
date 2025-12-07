@@ -10,14 +10,14 @@
 
 namespace helios::core {
 
-#define FUTURE_POST(RETURN_TYPE, BODY)                                         \
+#define REQ(RETURN_TYPE, BODY)                                         \
   [&]() -> helios::core::FutureResult<RETURN_TYPE>::Ptr {                      \
     auto fut = std::make_shared<helios::core::FutureResult<RETURN_TYPE>>();    \
     post([=]() mutable BODY);                                                  \
     return fut;                                                                \
   }()
 
-#define FUTURE_POST_CALLABLE(RETURN_TYPE, FUNC)                                \
+#define REQ_CALLABLE(RETURN_TYPE, FUNC)                                \
   [&]() -> helios::core::FutureResult<RETURN_TYPE>::Ptr {                      \
     auto fut = std::make_shared<helios::core::FutureResult<RETURN_TYPE>>();    \
     post([=, FUNC = FUNC]() mutable { FUNC(fut); });                           \

@@ -7,7 +7,7 @@ namespace calculator {
 class Calculator : public helios::core::ActiveHObject {
 public:
   helios::core::FutureResult<int>::Ptr add(int first, int second) {
-    return FUTURE_POST(int, {
+    return REQ(int, {
       int result = first + second;
       fut->set(result);
     });

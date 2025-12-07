@@ -12,7 +12,7 @@ class Calculator : helios::core::ActiveHObject {
 public:
   helios::core::FutureResult<int>::Ptr add(int first, int second) {
     auto handleAdd = [first, second](auto fut) { fut->set(first + second); };
-    return FUTURE_POST_CALLABLE(int, handleAdd);
+    return REQ_CALLABLE(int, handleAdd);
   };
 }; // class Calculator
 
