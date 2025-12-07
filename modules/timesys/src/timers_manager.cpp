@@ -16,4 +16,4 @@ TimersManager::~TimersManager() = default;
 
 void TimersManager::create(Duration duration, Callback cb) {}
 
-}; // namespace helios::timesys
+} // namespace helios::timesys

@@ -53,7 +53,7 @@ public:
 
 private:
   /**
-   * @brief Forward decleration for the implementation class.
+   * @brief Forward declaration for the implementation class.
    */
   class Impl;
 
@@ -63,4 +63,4 @@ private:
   std::unique_ptr<Impl> impl_;
 }; // class TimersManager
 
-}; // namespace helios::timesys
+} // namespace helios::timesys

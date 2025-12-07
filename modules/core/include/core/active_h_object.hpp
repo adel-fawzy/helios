@@ -119,4 +119,4 @@ private:
   void postImpl(Event e);
 }; // class ActiveHObject
 
-}; // namespace helios::core
+} // namespace helios::core

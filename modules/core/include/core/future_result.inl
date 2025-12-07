@@ -92,4 +92,4 @@ FutureResult<ResultType>::get(std::chrono::milliseconds timeout) {
   return res;
 }
 
-}; // namespace helios::core
+} // namespace helios::core

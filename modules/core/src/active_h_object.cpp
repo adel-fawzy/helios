@@ -66,4 +66,4 @@ void ActiveHObject::run() {
   }
 }
 
-}; // namespace helios::core
+} // namespace helios::core

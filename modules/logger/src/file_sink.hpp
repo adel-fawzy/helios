@@ -2,7 +2,8 @@
 
 #include <fstream>
 
-#include <core/h_object.hpp>
+#include <core/h_loop.hpp>
+#include <core/in_active_h_object.hpp>
 
 namespace helios::logger {
 
@@ -14,7 +15,7 @@ namespace helios::logger {
  * @details
  * - Does not make any modifications to the message, not even adding a new line.
  */
-class FileSink : public core::HObject {
+class FileSink : public core::InActiveHObject {
 public:
   /**
    * @brief Constructor.
@@ -22,7 +23,10 @@ public:
    * @param hBus Bus used for log messages.
    * @param filePath Path of the file used for logging.
    */
-  FileSink(std::shared_ptr<core::HBus> hBus, const std::string &filePath);
+  FileSink(
+      std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus,
+      const std::string &filePath
+  );
 
   /**
    * @brief Default virtual destructor.

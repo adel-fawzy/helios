@@ -26,7 +26,7 @@ public:
   }
 }; // class Worker
 
-}; // namespace
+} // namespace
 
 /**
  * @brief One object is added to HLoop and executed one event.

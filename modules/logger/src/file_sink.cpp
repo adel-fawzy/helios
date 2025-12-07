@@ -1,4 +1,5 @@
 #include "file_sink.hpp"
+
 #include "log_message.hpp"
 
 namespace {
@@ -15,17 +16,20 @@ void write(const std::string &s, std::ofstream &file) {
     file.flush();
   }
 }
+
 } // namespace
 
 namespace helios::logger {
 
-FileSink::FileSink(std::shared_ptr<core::HBus> hBus,
-                   const std::string &filePath)
-    : HObject{hBus}, file_{filePath} {
-  listen<LogMessage>([this](auto logMessage) {
-    auto e = [this, msg = logMessage->msg] { write(msg, file_); };
-    post(e);
-  });
+FileSink::FileSink(
+    std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus,
+    const std::string &filePath
+)
+    : InActiveHObject{loop, hBus}, file_{filePath} {
+  LISTEN(LogMessage, ([this](auto logMessage) {
+           auto e = [this, msg = logMessage->msg] { write(msg, file_); };
+           post(e);
+         }));
 }
 
 } // namespace helios::logger

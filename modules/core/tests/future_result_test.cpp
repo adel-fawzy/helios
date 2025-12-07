@@ -38,7 +38,7 @@ private:
   std::shared_ptr<Calculator> calculator_;
 }; // class Client
 
-}; // namespace
+} // namespace
 
 /**
  * @brief Use macros to pass a callback.

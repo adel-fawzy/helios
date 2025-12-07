@@ -34,7 +34,7 @@ public:
   }
 }; // class Thrower
 
-}; // namespace
+} // namespace
 
 /**
  * @brief Tests that posted functions are being executed.

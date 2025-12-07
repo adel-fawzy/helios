@@ -25,7 +25,7 @@ public:
   void startPublishing(Speed s) { PUBLISH(s); }
 }; // class Publisher
 
-}; // namespace
+} // namespace
 
 /**
  * @brief Publishes a signal then listens to it and verifies that the signal is

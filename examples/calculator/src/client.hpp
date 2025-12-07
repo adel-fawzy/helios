@@ -19,4 +19,4 @@ private:
   std::shared_ptr<Calculator> calculator_;
 }; // class Client
 
-}; // namespace calculator
+} // namespace calculator

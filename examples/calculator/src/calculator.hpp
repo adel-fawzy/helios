@@ -14,4 +14,4 @@ public:
   }
 }; // class Calculator
 
-}; // namespace calculator
+} // namespace calculator

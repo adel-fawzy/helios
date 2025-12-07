@@ -1,7 +1,8 @@
 #pragma once
 
-#include <core/h_object.hpp>
 #include <memory>
+
+#include <core/in_active_h_object.hpp>
 
 namespace helios::logger {
 
@@ -13,14 +14,16 @@ namespace helios::logger {
  * @details
  * - Does not make any modifications to the message, not even adding a new line.
  */
-class StandardOutputSink : public core::HObject {
+class StandardOutputSink : public core::InActiveHObject {
 public:
   /**
    * @brief Constructor.
    *
    * @param hBus Bus used for log messages.
    */
-  StandardOutputSink(std::shared_ptr<core::HBus> hBus);
+  StandardOutputSink(
+      std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus
+  );
 
   /**
    * @brief Default virtual destructor.
