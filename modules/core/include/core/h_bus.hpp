@@ -51,14 +51,14 @@ public:
    *        published on the bus.
    */
   template <typename SignalT>
-  void
-  listen(ID id,
-         std::function<void(std::shared_ptr<const SignalT>)> listenerCallback) {
+  void listen(
+      ID id,
+      std::function<void(std::shared_ptr<const SignalT>)> listenerCallback
+  ) {
     // Wrap user callback
-    auto wrapper =
-        [cb = std::move(listenerCallback)](std::shared_ptr<const void> s) {
-          cb(std::static_pointer_cast<const SignalT>(s));
-        };
+    auto wrapper = [cb = std::move(listenerCallback)](
+                       std::shared_ptr<const void> s
+                   ) { cb(std::static_pointer_cast<const SignalT>(s)); };
 
     listenImpl(typeid(SignalT), id, std::move(wrapper));
   }
@@ -69,7 +69,8 @@ public:
    * @tparam SignalT Type of the published signal.
    * @param s The published signal.
    */
-  template <typename SignalT> void publish(SignalT &&s) {
+  template <typename SignalT>
+  void publish(SignalT &&s) {
     using T = std::remove_cv_t<std::remove_reference_t<SignalT>>;
     publishImpl(typeid(T), std::make_shared<T>(std::forward<SignalT>(s)));
   }
@@ -92,12 +93,13 @@ private:
    */
   std::unique_ptr<Impl> impl_;
 
-  void
-  listenImpl(std::type_index signalType, ID id,
-             std::function<void(std::shared_ptr<const void>)> wrapperCallback);
+  void listenImpl(
+      std::type_index signalType, ID id,
+      std::function<void(std::shared_ptr<const void>)> wrapperCallback
+  );
 
-  void publishImpl(std::type_index signalType,
-                   std::shared_ptr<const void> signal);
+  void
+  publishImpl(std::type_index signalType, std::shared_ptr<const void> signal);
 }; // class HBus
 
 } // namespace helios::core

@@ -15,7 +15,8 @@ class Listener : public helios::core::HObject {
 public:
   Listener(std::shared_ptr<helios::core::HBus> hBus) : HObject(hBus) {}
   void startListening(std::function<void(std::shared_ptr<const Speed>)> cb) {
-    LISTEN(Speed, [cb](auto s) { cb(s); });
+    auto onSig = [cb](auto sig) { cb(sig); };
+    listen<Speed>(onSig);
   }
 }; // class Listener
 

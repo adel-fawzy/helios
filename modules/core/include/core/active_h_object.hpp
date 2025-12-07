@@ -10,17 +10,17 @@
 
 namespace helios::core {
 
-#define FUTURE_POST(retType, body)                                             \
-  [&]() -> helios::core::FutureResult<retType>::Ptr {                          \
-    auto fut = std::make_shared<helios::core::FutureResult<retType>>();        \
-    post([=]() mutable body);                                                  \
+#define FUTURE_POST(RETURN_TYPE, BODY)                                         \
+  [&]() -> helios::core::FutureResult<RETURN_TYPE>::Ptr {                      \
+    auto fut = std::make_shared<helios::core::FutureResult<RETURN_TYPE>>();    \
+    post([=]() mutable BODY);                                                  \
     return fut;                                                                \
   }()
 
-#define FUTURE_POST_CALLABLE(retType, fn)                                      \
-  [&]() -> helios::core::FutureResult<retType>::Ptr {                          \
-    auto fut = std::make_shared<helios::core::FutureResult<retType>>();        \
-    post([=, fn = fn]() mutable { fn(fut); });                                 \
+#define FUTURE_POST_CALLABLE(RETURN_TYPE, FUNC)                                \
+  [&]() -> helios::core::FutureResult<RETURN_TYPE>::Ptr {                      \
+    auto fut = std::make_shared<helios::core::FutureResult<RETURN_TYPE>>();    \
+    post([=, FUNC = FUNC]() mutable { FUNC(fut); });                           \
     return fut;                                                                \
   }()
 
@@ -76,7 +76,8 @@ protected:
    * @tparam EventT Type of event to be posted.
    * @param e Event to be posted.
    */
-  template <typename EventT> void post(EventT &&e) {
+  template <typename EventT>
+  void post(EventT &&e) {
     postImpl(std::forward<EventT>(e));
   }
 

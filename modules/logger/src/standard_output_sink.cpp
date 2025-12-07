@@ -24,10 +24,7 @@ StandardOutputSink::StandardOutputSink(
     std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus
 )
     : InActiveHObject{loop, hBus} {
-  LISTEN(LogMessage, ([this](auto logMessage) {
-           auto e = [this, msg = logMessage->msg] { write(msg); };
-           post(e);
-         }));
+  LISTEN(LogMessage, { write(sig->msg); });
 }
 
 } // namespace helios::logger

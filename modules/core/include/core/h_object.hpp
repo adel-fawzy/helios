@@ -7,9 +7,13 @@
 
 namespace helios::core {
 
-#define LISTEN(Type, Callback) listen<Type>(Callback)
+#define LISTEN(TYPE, BODY)                                                     \
+  listen<TYPE>([this](auto sig) mutable { post([ this, sig ] BODY); })
 
-#define PUBLISH(Value) publish(Value)
+#define LISTEN_CALLABLE(TYPE, FUNC)                                            \
+  listen<TYPE>([this](auto sig) mutable { post(FUNC); })
+
+#define PUBLISH(VALUE) publish(VALUE)
 
 /**
  * @class core::HObject
@@ -53,7 +57,8 @@ protected:
    * @tparam CallbackT The type of the callback function.
    * @param cb The callback function to invoke when the signal is published.
    */
-  template <typename SignalT, typename CallbackT> void listen(CallbackT &&cb) {
+  template <typename SignalT, typename CallbackT>
+  void listen(CallbackT &&cb) {
     if (hBus_)
       hBus_->listen<SignalT>(id_, std::forward<CallbackT>(cb));
   }
@@ -64,7 +69,8 @@ protected:
    * @tparam SignalT The signal type to publish.
    * @param s The signal to publish.
    */
-  template <typename SignalT> void publish(SignalT &&s) {
+  template <typename SignalT>
+  void publish(SignalT &&s) {
     if (hBus_)
       hBus_->publish<SignalT>(std::forward<SignalT>(s));
   }

@@ -26,10 +26,7 @@ FileSink::FileSink(
     const std::string &filePath
 )
     : InActiveHObject{loop, hBus}, file_{filePath} {
-  LISTEN(LogMessage, ([this](auto logMessage) {
-           auto e = [this, msg = logMessage->msg] { write(msg, file_); };
-           post(e);
-         }));
+  LISTEN(LogMessage, { write(sig->msg, file_); });
 }
 
 } // namespace helios::logger
