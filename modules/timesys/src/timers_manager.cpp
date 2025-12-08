@@ -2,9 +2,11 @@
 
 #include <queue>
 
+#include "core/active_h_object.hpp"
+
 namespace helios::timesys {
 
-class TimersManager::Impl {
+class TimersManager::Impl : public core::ActiveHObject {
 public:
 private:
 }; // class Impl

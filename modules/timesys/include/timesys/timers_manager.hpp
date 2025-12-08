@@ -38,9 +38,9 @@ public:
   /**
    * @brief Type aliases.
    */
-  using Clock = std::chrono::steady_clock;
-  using Duration = Clock::duration;
-  using TimePoint = Clock::time_point;
+  using SteadyClock = std::chrono::steady_clock;
+  using Duration = SteadyClock::duration;
+  using TimePoint = SteadyClock::time_point;
   using Callback = std::function<void()>;
 
   /**

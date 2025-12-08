@@ -9,4 +9,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add modules
 add_subdirectory(modules/core)
 add_subdirectory(modules/logger)
-# add_subdirectory(modules/timesys)
+add_subdirectory(modules/timesys)

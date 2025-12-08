@@ -15,6 +15,7 @@ target_include_directories(timesys
 find_package(Threads REQUIRED)
 target_link_libraries(timesys
     PRIVATE
+        core
         Threads::Threads
 )
 
