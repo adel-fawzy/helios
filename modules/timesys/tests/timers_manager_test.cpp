@@ -4,15 +4,9 @@
 #include <gtest/gtest.h>
 
 /**
- * @test
- * @brief Tests creating one timer and waiting for it to fire.
- *
- * @steps
- * 1. Call 'TimersManager::create' with a 10 milli-second duration.
- * 2. Wait until the timer fires.
- * 3. Verify that the timer fired by checking that a bool is toggled.
+ * @brief Verifies that one timer fires.
  */
-TEST(TimersManagerTest, NormalTimer) {
+TEST(TimersManagerTest, OneTimerFires) {
   helios::timesys::TimersManager t;
   std::promise<void> pr;
   bool isTimerFired{false};
@@ -23,3 +17,11 @@ TEST(TimersManagerTest, NormalTimer) {
   pr.get_future().wait(); // Wait for the timer to fire
   EXPECT_TRUE(isTimerFired);
 }
+
+/**
+ * @brief Verifies that multiple timers fire.
+ * 
+ * @details
+ * - Multiple timers shall be created and each of them shall be verified that it has fired.
+ */
+TEST(TimersManagerTest, MultipleTimersFire) {}
