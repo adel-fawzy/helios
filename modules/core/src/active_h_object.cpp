@@ -41,7 +41,7 @@ void ActiveHObject::postImpl(Event e) {
 }
 
 void ActiveHObject::run() {
-  while (!stopLoop_) {
+  while (true) {
     std::deque<Event> snapshot;
     {
       std::unique_lock<std::mutex> lock(mtx_);
