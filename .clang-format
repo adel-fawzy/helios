@@ -1,0 +1,10 @@
+# Use a base style (e.g., LLVM, Google, Chromium, Microsoft, WebKit)
+# You can start with a base style and then override specific settings.
+# Style: LLVM 
+
+IndentWidth: 2
+NamespaceIndentation: None 
+AlignAfterOpenBracket: BlockIndent
+BreakTemplateDeclarations: Yes
+IndentAccessSpecifiers: false
+AccessModifierOffset: -2

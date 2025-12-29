@@ -1,0 +1,30 @@
+#pragma once
+
+#include "logger/log_level.hpp"
+
+#cmakedefine01 LOG_SINK_STDOUT
+#cmakedefine01 LOG_SINK_FILE
+
+namespace helios::logger {
+
+/**
+ * @brief Log file path.
+ */
+// clang-format off
+inline constexpr const char* LOG_FILE_PATH = "@LOG_FILE_PATH@";
+// clang-format on
+
+/**
+ * @brief Minimum log level.
+ */
+// clang-format off
+constexpr LogLevel LOG_LEVEL_MIN = LogLevel::@MIN_LOG_LEVEL@;
+// clang-format on
+
+/**
+ * @brief Log sinks.
+ */
+inline constexpr bool ENABLE_STDOUT_SINK = LOG_SINK_STDOUT;
+inline constexpr bool ENABLE_FILE_SINK = LOG_SINK_FILE;
+
+} // namespace helios::logger
