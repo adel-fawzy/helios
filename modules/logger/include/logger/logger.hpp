@@ -53,7 +53,7 @@ public:
 
 private:
   /**
-   * @brief Forward decleration for the implementation class.
+   * @brief Forward declaration for the implementation class.
    */
   class Impl;
 

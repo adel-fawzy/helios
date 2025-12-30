@@ -36,7 +36,7 @@ private:
   /**
    * @brief Signal bus that holds the signals for logging.
    */
-  static std::shared_ptr<core::HBus> logBus_;
+  static core::HBus logBus_;
 
   /**
    * @brief Vector of shared pointers to sinks.
@@ -66,13 +66,11 @@ LogMessageFactory Logger::error() { return impl_->make(LogLevel::Error); }
 
 Logger::Impl::Impl(std::string name) : name_{name} {}
 
-std::shared_ptr<core::HBus> Logger::Impl::logBus_{
-    std::make_shared<core::HBus>()
-};
-
 std::shared_ptr<core::HLoop> Logger::Impl::loop_{
     std::make_shared<core::HLoop>()
 };
+
+core::HBus Logger::Impl::logBus_{};
 
 std::vector<std::shared_ptr<core::HObject>> Logger::Impl::sinks_;
 
@@ -81,17 +79,17 @@ std::once_flag Logger::Impl::isSinksInitialized_;
 LogMessageFactory Logger::Impl::make(LogLevel lvl) {
   std::call_once(isSinksInitialized_, [] { Logger::Impl::initSinks(); });
   return LogMessageFactory(lvl, name_, [this](std::string msg) {
-    logBus_->publish<LogMessage>(std::move(msg));
+    logBus_.publish<LogMessage>(std::move(msg));
   });
 }
 
 void Logger::Impl::initSinks() {
   if constexpr (ENABLE_STDOUT_SINK) {
-    sinks_.emplace_back(std::make_shared<StandardOutputSink>(loop_, logBus_));
+    sinks_.emplace_back(std::make_shared<StandardOutputSink>(loop_, &logBus_));
   }
 
   if constexpr (ENABLE_FILE_SINK) {
-    sinks_.emplace_back(std::make_shared<FileSink>(loop_, logBus_));
+    sinks_.emplace_back(std::make_shared<FileSink>(loop_, &logBus_));
   }
 }
 

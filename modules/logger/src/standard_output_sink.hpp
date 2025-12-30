@@ -19,10 +19,11 @@ public:
   /**
    * @brief Constructor.
    *
+   * @param loop Event loop.
    * @param hBus Bus used for log messages.
    */
   StandardOutputSink(
-      std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus
+      std::shared_ptr<core::HLoop> loop, core::HBus *hBus
   );
 
   /**
