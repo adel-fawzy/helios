@@ -1,7 +1,6 @@
 #include "timesys/timers_manager.hpp"
 
 #include <future>
-#include <iostream>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -26,9 +25,10 @@ public:
    * @brief Struct that represents a timer.
    */
   struct Timer {
-    Timer(TimePoint tp, Callback cb) : tp_{tp}, cb_{cb} {}
-    TimePoint tp_;
-    Callback cb_;
+    Timer(TimersManager::TimePoint tp, TimersManager::Callback cb)
+        : tp_{tp}, cb_{cb} {}
+    TimersManager::TimePoint tp_;
+    TimersManager::Callback cb_;
     bool operator<(const Timer &other) const { return tp_ > other.tp_; }
   }; // struct Timer
 
