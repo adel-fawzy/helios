@@ -21,7 +21,7 @@ void write(const std::string &s) {
 namespace helios::logger {
 
 StandardOutputSink::StandardOutputSink(
-    std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus
+    std::shared_ptr<core::HLoop> loop, core::HBus *hBus
 )
     : InActiveHObject{loop, hBus} {
   LISTEN(LogMessage, { write(sig->msg); });

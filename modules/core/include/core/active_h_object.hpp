@@ -46,12 +46,12 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param hBus Optional shared pointer to the signal bus.
+   * @param hBus Optional pointer to the signal bus.
    *
    * @note
    * - Blocks until the event is started and then returns.
    */
-  ActiveHObject(std::shared_ptr<HBus> hBus = nullptr);
+  ActiveHObject(HBus *hBus = nullptr);
 
   /**
    * @brief Destructor.

@@ -5,8 +5,8 @@
 namespace helios::core {
 
 InActiveHObject::InActiveHObject(std::shared_ptr<HLoop> loop,
-                                 std::shared_ptr<HBus> hBus)
-    : HObject(std::move(hBus)), loop_(loop) {}
+                                 HBus *hBus)
+    : HObject(hBus), loop_(loop) {}
 
 InActiveHObject::~InActiveHObject() {
   // Post a stop event

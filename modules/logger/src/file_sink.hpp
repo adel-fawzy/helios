@@ -20,11 +20,12 @@ public:
   /**
    * @brief Constructor.
    *
+   * @param loop Event loop.
    * @param hBus Bus used for log messages.
    * @param filePath Path of the file used for logging.
    */
   FileSink(
-      std::shared_ptr<core::HLoop> loop, std::shared_ptr<core::HBus> hBus,
+      std::shared_ptr<core::HLoop> loop, core::HBus *hBus,
       const std::string &filePath
   );
 

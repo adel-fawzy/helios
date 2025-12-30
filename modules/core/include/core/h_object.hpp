@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <memory>
 
 #include "h_bus.hpp"
 
@@ -29,9 +28,9 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param bus Shared pointer to the signal bus.
+   * @param bus Pointer to the signal bus.
    */
-  HObject(std::shared_ptr<HBus> hBus) : hBus_(hBus), id_(++nextId_) {}
+  HObject(HBus *hBus) : hBus_(hBus), id_(++nextId_) {}
 
   /**
    * @brief Virtual destructor.
@@ -87,9 +86,9 @@ private:
   const ID id_;
 
   /**
-   * @brief Shared pointer to the signal bus.
+   * @brief Pointer to the signal bus.
    */
-  std::shared_ptr<HBus> hBus_;
+  HBus *hBus_;
 }; // class HObject
 
 } // namespace helios::core
