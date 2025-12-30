@@ -39,13 +39,15 @@ HBus::~HBus() = default;
 
 void HBus::listenImpl(
     std::type_index signalType, ID id,
-    std::function<void(std::shared_ptr<const void>)> wrapperCallback) {
+    std::function<void(std::shared_ptr<const void>)> wrapperCallback
+) {
   std::lock_guard<std::mutex> lock(impl_->mtx_);
   impl_->signalsMap_[signalType][id] = std::move(wrapperCallback);
 }
 
-void HBus::publishImpl(std::type_index signalType,
-                       std::shared_ptr<const void> signal) {
+void HBus::publishImpl(
+    std::type_index signalType, std::shared_ptr<const void> signal
+) {
   std::unordered_map<ID, std::function<void(std::shared_ptr<const void>)>>
       snapshot;
 
@@ -56,8 +58,8 @@ void HBus::publishImpl(std::type_index signalType,
       snapshot = it->second;
   }
 
-  for (auto &cb : snapshot)
-    cb.second(signal);
+  for (auto &[id, cb] : snapshot)
+    cb(signal);
 }
 
 void HBus::unlisten(ID id) {

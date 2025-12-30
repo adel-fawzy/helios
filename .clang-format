@@ -6,5 +6,4 @@ IndentWidth: 2
 NamespaceIndentation: None 
 AlignAfterOpenBracket: BlockIndent
 BreakTemplateDeclarations: Yes
-IndentAccessSpecifiers: false
 AccessModifierOffset: -2
